@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/iconeSerial">
+        <file>icone/disconnect.png</file>
+        <file>icone/settings.png</file>
+        <file>icone/usb.png</file>
+    </qresource>
+    <qresource prefix="/iconeWindows">
+        <file>icone/Qt_logo_2016.svg.png</file>
+        <file>icone/question.png</file>
+        <file>icone/remove.png</file>
+        <file>icone/usb.png</file>
+        <file>icone/broom.png</file>
+        <file>icone/usb.ico</file>
+        <file>icone/saber.png</file>
+    </qresource>
+    <qresource prefix="/iconeMotor">
+        <file>icone/flags.png</file>
+        <file>icone/reset.png</file>
+        <file>icone/route.png</file>
+        <file>icone/stop.png</file>
+        <file>icone/send.png</file>
+        <file>icone/command-window.png</file>
+        <file>icone/checked.png</file>
+        <file>icone/house.png</file>
+    </qresource>
+    <qresource prefix="/iconePhoto">
+        <file>icone/1F4F8-camera-with-flash-512.png</file>
+        <file>icone/icons8-ajouter-appareil-photo-96.png</file>
+        <file>icone/icons8-pas-d'appareil-photo-100.png</file>
+    </qresource>
+</RCC>
