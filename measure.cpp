@@ -20,6 +20,8 @@ void Measure::run()
 
     m_image = new QImage;
 
+    m_error = false;
+
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MEASURE] " << QThread::currentThread();
     qRegisterMetaType<AsiCamera::ControlValue>();
 
@@ -83,7 +85,6 @@ void Measure::askOpenCamera()
      qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Send a new move";
 }
 
-
 void Measure::sendPosition(){
     emit sigSendPositionMeasure(((qRound(m_step*m_counter*10))+qRound(m_positionMin*10))/10.0);
 
@@ -96,13 +97,16 @@ void Measure::startMeasure(int max, int min, float step, QString dir){
     m_positionMin = min;
     m_step = step;
     m_mainDir = dir;
+
     QString Images = "/Images";
     //QString ImagesCalibrates = "/Images_to_calibrate";
+    m_imageDir = Images.prepend(dir);
+
 
     m_mainFolder = QDir(dir);
     m_mainFolder.mkdir("Images");
-    //m_mainFolder.mkdir("Images_to_calibrate");
-    m_imageFolder = QDir(Images.prepend(dir));
+    m_mainFolder.mkdir("Images_to_calibrate");
+    //m_imageFolder = QDir(Images.prepend(dir));
     //m_dossierImagesCalibrate = new QDir(ImagesCalibrates.prepend(dir));
 
     m_startMeasure = true;
@@ -113,6 +117,7 @@ void Measure::startMeasure(int max, int min, float step, QString dir){
 
 void Measure::imageReception(ASI_IMG_TYPE format, const int width, const int height, const QImage frame)
 {
+
     if(m_startMeasure){
 
         m_mut.lock();
@@ -131,6 +136,7 @@ void Measure::imageReception(ASI_IMG_TYPE format, const int width, const int hei
 
 
 
+        propretyImage();
         m_semGetPhoto->release(1);
 
         m_mut.unlock();
@@ -181,30 +187,62 @@ void Measure::controlValueMeasure(AsiCamera::ControlValue controlvalue)
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Control value receive";
 }
 
-/*void Measure::propertyImage(QString name)
+void Measure::propretyImage()
 {
-    m_proprieteImage = new QFile(name);
 
-    QString stringPosition;
+    QString setProprityImage;
 
-     //stringPosition = QString("Position=%1\n"
-     //                "PositionMax=%2\n"
-     //                "PositionMin=%3\n").arg((double)*m_position,0,'g',4).arg(*m_positionMax,0,'g',4).arg(*m_positionMin,0,'g',4);
+    QString nameImage = QString("/capture_#%1_%2us.png").arg(m_counter).arg(m_controlvalue.val_exposure);
+    QString nameFile = QString("/capture_#%1_%2us_CameraSettings.txt").arg(m_counter).arg(m_controlvalue.val_exposure);
 
-    if (!m_proprieteImage->open(QIODevice::WriteOnly | QIODevice::Text))
+
+    nameImage.prepend(m_imageDir);
+    nameFile.prepend(m_imageDir);
+
+    QFile fileImage(nameFile);
+
+    if (!fileImage.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        QMessageBox::warning(this, "Enregistrement des propriétés images ","Enregistrement des propriétés images impossible");
-        return;
+        m_error = true;
+        //return;
     }
 
-    //m_proprity->prepend(stringPosition);
+    if(!m_image->save(nameImage,"PNG"))
+    {
+        m_error = true;
+    }
 
-    QTextStream out(m_proprieteImage);
-    out << *m_proprity;
+    setProprityImage = QString("Position : %1 \n"
+             "Gain : %2 \n"
+             "Exposure : %3 \n"
+             "Gamma : %4 \n"
+             "Offset : %5 \n"
+             "BandWidth : %6 \n"
+             "Temperature : %7 \n"
+             "Flip : %8 \n"
+             "AutoExpMaxGain : %9 \n"
+             "AutoExpMaxExpMS : %10 \n"
+             "AutoExpTargetBrightness : %11 \n"
+             "HarwareBin : %12 \n"
+             "HighSpeedMode : %13 \n")
+            .arg(m_positionActu)
+            .arg(m_controlvalue.val_gain)
+            .arg(m_controlvalue.val_exposure)
+            .arg(m_controlvalue.val_gamma)
+            .arg(m_controlvalue.val_offset)
+            .arg(m_controlvalue.val_bandWidth)
+            .arg(m_controlvalue.val_temperature)
+            .arg(m_controlvalue.val_flip)
+            .arg(m_controlvalue.val_autoExpMaxGain)
+            .arg(m_controlvalue.val_autoExpTargetBrightness)
+            .arg(m_controlvalue.val_harwareBin)
+            .arg(m_controlvalue.auto_highSpeedMode);
 
-    m_proprieteImage->close();
 
-    delete m_proprieteImage;
+    QTextStream out(&fileImage);
+    out << setProprityImage;
 
+
+    fileImage.close();
 }
-*/
+

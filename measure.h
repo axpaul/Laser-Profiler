@@ -28,6 +28,7 @@ public:
     void askOpenCamera();
     void askTakePhoto();
     void sendPosition();
+    void propretyImage();
 
 public slots :
     void imageReception(ASI_IMG_TYPE format, const int width, const int height, const QImage frame);
@@ -66,8 +67,10 @@ private :
     int m_counter;
 
     float m_step;
+    bool m_error;
 
     QString m_mainDir;
+    QString m_imageDir;
 
     QSemaphore *m_semOpenCam;
     QSemaphore *m_semGetPhoto;
