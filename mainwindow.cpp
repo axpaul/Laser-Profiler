@@ -860,6 +860,7 @@ void MainWindow::startMeasure()
     ui->checkBox_Camera_Parameters->setEnabled(false);
 
     buttonCameraDesactivate();
+    motorNobuttonAll();
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Start Measure";
     emit sendStartMeasure(ui->spinBox_Max->value(), ui->spinBox_Min->value(), ui->spinBox_measure->value(), dir);
@@ -868,6 +869,7 @@ void MainWindow::startMeasure()
 void MainWindow::endMeasure()
 {
     buttonCameraActivate();
+    motorbuttonActivate();
     m_startMeasure = false;
     ui->checkBox_Camera_Parameters->setCheckable(false);
     ui->checkBox_Camera_Parameters->setEnabled(false);

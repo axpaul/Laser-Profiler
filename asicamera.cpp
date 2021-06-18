@@ -14,12 +14,13 @@ AsiCamera::AsiCamera()
 
     m_piNumberOfControls = 0;
     m_NBConnectedCamera = 0;
-    m_videoStart = false;
     m_statut = ASI_EXP_IDLE;
     m_modeCamera = ASI_MODE_NORMAL;
 
     m_askClose = false;
     m_getPhoto = false;
+    m_videoStart = false;
+    m_askVideo = false;
 
     m_error = ASI_SUCCESS;
 }
@@ -67,6 +68,9 @@ void AsiCamera::run()
                         }
                         else if(m_askClose == true){
                             closeCamera();
+                        }
+                        else if(m_askVideo == true){
+                            controlVideo();
                         }
                     mut.unlock();
                 }
@@ -124,7 +128,7 @@ ASI_ERROR_CODE AsiCamera::closeCamera()
 {
     // Stop la video de la camera
 
-    if (m_videoStart == true)
+    if (m_askVideo == true)
     {
         m_error = ASIStopVideoCapture(pASICameraInfo->CameraID);
 
@@ -133,6 +137,8 @@ ASI_ERROR_CODE AsiCamera::closeCamera()
             emit sigErrorCamera(m_error);
             return m_error;
         }
+
+        m_askVideo = false;
     }
 
     // Coupe la liaison
@@ -1219,6 +1225,10 @@ void AsiCamera::askConnect()
 void AsiCamera::askClose()
 {
     m_askClose = true;
+
+    if (m_askVideo == true)
+         m_videoStart = false;
+
     m_sem->release(1);
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][Camera] Ask Close";
 
@@ -1247,3 +1257,54 @@ void AsiCamera::allSettings(const int width, const int Height, const int Bin, co
 
 }
 
+//Mode Video
+
+ASI_ERROR_CODE AsiCamera::askVideo(){
+
+    m_error = ASIStartVideoCapture(pASICameraInfo->CameraID);
+
+    if (m_error != ASI_SUCCESS)
+    {
+        emit sigErrorCamera(m_error);
+        return m_error;
+    }
+
+    m_videoStart = true;
+    m_askVideo = true;
+    m_sem->release(1);
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][Camera] Ask video";
+
+    return m_error;
+}
+
+ASI_ERROR_CODE AsiCamera::controlVideo()
+{
+    if (m_piformat == ASI_IMG_RAW8)
+    {
+        *m_frame = {m_piWidth, m_piHeight, QImage::Format_Grayscale8};
+    }
+    else if (m_piformat == ASI_IMG_RAW16)
+    {
+        *m_frame = {m_piWidth, m_piHeight, QImage::Format_Grayscale16};
+    }
+    else
+    {
+        emit sigErrorCamera(m_error);
+        return ASI_ERROR_INVALID_IMGTYPE;
+    }
+
+    while(m_videoStart == true){
+
+        if(ASIGetVideoData(pASICameraInfo->CameraID,m_frame->bits(), m_frame->sizeInBytes(), -1) == ASI_SUCCESS) {
+
+            sendControlValue();
+            emit sigImageReception(m_piformat, m_piWidth, m_piHeight, *m_frame);
+
+            qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][Camera] Video Image";
+
+        }
+    }
+
+
+    return m_error;
+}

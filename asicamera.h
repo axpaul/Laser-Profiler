@@ -163,13 +163,14 @@ public:
 
     void run() override;
     ASI_ERROR_CODE sendControlValue();
+    ASI_ERROR_CODE controlVideo();
 
 public slots:
 
     void askConnect();
     void askClose();
     void askPhoto();
-    //void askVideo();
+    ASI_ERROR_CODE askVideo();
 
     void allSettings(const int iWidth, const int Height, const int Bin, const int startX, const int startY, const ASI_IMG_TYPE format, const ControlValue controlValue);
 
@@ -206,6 +207,7 @@ private:
     bool m_connected;
     bool m_getPhoto;
     bool m_askClose;
+    bool m_askVideo;
 
     ControlIndex m_controlIndex;
     AllControlCAP m_controlCap;
