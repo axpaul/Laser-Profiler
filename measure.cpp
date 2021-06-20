@@ -192,8 +192,14 @@ void Measure::propretyImage()
 
     QString setProprityImage;
 
-    QString nameImage = QString("/capture_#%1_%2us.png").arg(m_counter).arg(m_controlvalue.val_exposure);
-    QString nameFile = QString("/capture_#%1_%2us_CameraSettings.txt").arg(m_counter).arg(m_controlvalue.val_exposure);
+    char cpt[5];
+    QString stringCounter;
+
+    sprintf(cpt, "%04d", (m_counter));
+    stringCounter = cpt;
+
+    QString nameImage = QString("/capture_#%1_%2us.png").arg(stringCounter).arg(m_controlvalue.val_exposure);
+    QString nameFile = QString("/capture_#%1_%2us_CameraSettings.txt").arg(stringCounter).arg(m_controlvalue.val_exposure);
 
 
     nameImage.prepend(m_imageDir);
