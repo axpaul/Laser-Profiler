@@ -27,6 +27,8 @@ void Measure::run()
 
     m_startMeasure = false;
 
+    double pourcentage = 0;
+
     while(1)
     {
         m_counter = 0;
@@ -55,8 +57,8 @@ void Measure::run()
                 sendPosition();
                 m_semSendPosition->acquire(1);
 
-               //int pourcentage = (m_counter/m_counterMax)*100;
-               //emit sigSendStateMeasure(pourcentage);
+               pourcentage = qRound(double(m_counter)/double(m_counterMax))*100;
+               emit sigSendStateMeasure(int(pourcentage));
             }
 
             askOpenCamera();
@@ -86,6 +88,7 @@ void Measure::askOpenCamera()
 }
 
 void Measure::sendPosition(){
+
     emit sigSendPositionMeasure(((qRound(m_step*m_counter*10))+qRound(m_positionMin*10))/10.0);
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Send a new move";
@@ -120,7 +123,7 @@ void Measure::imageReception(ASI_IMG_TYPE format, const int width, const int hei
 
     if(m_startMeasure){
 
-        m_mut.lock();
+       // m_mut.lock();
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] image receive";
 
         if (format == ASI_IMG_RAW8)
@@ -134,23 +137,22 @@ void Measure::imageReception(ASI_IMG_TYPE format, const int width, const int hei
 
         *m_image = frame;
 
-
-
         propretyImage();
         m_semGetPhoto->release(1);
 
-        m_mut.unlock();
+       // m_mut.unlock();
     }
 
 }
 
 void Measure::oppenedCameraMeasure()
 {
-    if(m_startMeasure)
+    if(m_startMeasure) 
     {
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Camera opened";
         m_semOpenCam->release(1);
     }
+
 }
 
 void Measure::closedCameraMeasure()
@@ -160,10 +162,12 @@ void Measure::closedCameraMeasure()
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Camera closed";
         m_semGetPhoto->release(1);
     }
+
 }
 
 void Measure::positionReception(const double position)
 {
+
     if(m_startMeasure)
     {
         m_positionActu = position;
@@ -183,13 +187,14 @@ void Measure::endMeasure()
 
 void Measure::controlValueMeasure(AsiCamera::ControlValue controlvalue)
 {
+    if(m_startMeasure){
     m_controlvalue = controlvalue;
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Control value receive";
+    }
 }
 
 void Measure::propretyImage()
 {
-
     QString setProprityImage;
 
     char cpt[5];
@@ -248,7 +253,8 @@ void Measure::propretyImage()
     QTextStream out(&fileImage);
     out << setProprityImage;
 
-
     fileImage.close();
+
+    delete m_image;
 }
 

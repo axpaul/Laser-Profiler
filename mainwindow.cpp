@@ -1,11 +1,17 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+Q_DECLARE_METATYPE(ASI_ERROR_CODE);
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+
+    qRegisterMetaType<ASI_ERROR_CODE>();
     ui->setupUi(this);
+
+    ui->progressBar->setRange(0,100);
 
     console = ui->console_Window;
 
@@ -17,11 +23,12 @@ MainWindow::MainWindow(QWidget *parent)
     m_infoHome->setText("Wait for the camera to return to its initial position. "
 "\nIf the camera is in the initial position press ''Ok''. ");
 
-    m_camera = new AsiCamera;
+    m_camera = new AsiCamera();
     m_cameraRun = false;
     m_cameraControlChange = false;
+    m_videoRun = false;
 
-    m_photo = new QPixmap;
+    m_photo = new QPixmap();
     m_scene = new QGraphicsScene;
 
     m_camera->start();
@@ -132,6 +139,8 @@ void MainWindow::initActionsConnections(){
     connect(this, &MainWindow::sigAllSettings, m_camera, &AsiCamera::allSettings);
 
     connect(m_camera, &AsiCamera::sigImageReception, this, &MainWindow::showImage);
+    connect(ui->actionVideo, &QAction::triggered, m_camera, &AsiCamera::askVideo);
+    connect(ui->actionVideo, &QAction::triggered, this, &MainWindow::buttonVideoActivate);
 
     connect(ui->button_Start_Measure, &QPushButton::clicked, this, &MainWindow::startMeasure);
     connect(this, &MainWindow::sendStartMeasure, m_measure, &Measure::startMeasure);
@@ -387,9 +396,10 @@ void MainWindow::opennedCamera(bool state)
 {
     if (state == true){
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera openned";
+       m_cameraRun = true;
+
         if (!m_startMeasure)
             buttonCameraActivate();
-        m_cameraRun = true;
 
         if (m_cameraControlChange)
             emit sigAllSettings(ui->spinBox_width->value(), ui->spinBox_Height->value(), 1, ui->spinBox_start_PosX->value(), ui->spinBox_start_PosY->value(), m_format, m_controlValue);
@@ -399,11 +409,21 @@ void MainWindow::opennedCamera(bool state)
 
 void MainWindow::closedCamera(bool state)
 {
+    bool endVideo = false;
     if (state == true){
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera closed";
-    if (!m_startMeasure)
-        buttonCameraDesactivate();
+    if(m_videoRun){
+        m_videoRun = false;
+        endVideo = true;
+    }
     m_cameraRun = false;
+
+    if (!m_startMeasure || !endVideo)
+        buttonCameraDesactivate();   
+    }
+    else if (!m_startMeasure || endVideo)
+    {
+        buttonVideoDesactivate();
     }
 }
 
@@ -569,16 +589,18 @@ void MainWindow::buttonCameraActivate(){
         ui->checkBox_gain->setEnabled(true);
         ui->checkBox_bandWidh->setEnabled(true);
         ui->checkBox_exposure->setEnabled(true);
+        ui->checkBox_Camera_Parameters->setEnabled(true);
 
         ui->actionConnect_ZWO->setEnabled(true);
         ui->actionDisconect_ZWO->setEnabled(false);
         ui->actionPhoto->setEnabled(false);
-
+        ui->actionVideo->setEnabled(false);
      }
     else{
         ui->actionConnect_ZWO->setEnabled(false);
         ui->actionDisconect_ZWO->setEnabled(true);
         ui->actionPhoto->setEnabled(true);
+        ui->actionVideo->setEnabled(true);
     }
 
 }
@@ -606,15 +628,18 @@ void MainWindow::buttonCameraDesactivate(){
         ui->checkBox_gain->setEnabled(false);
         ui->checkBox_bandWidh->setEnabled(false);
         ui->checkBox_exposure->setEnabled(false);
+        ui->checkBox_Camera_Parameters->setEnabled(false);
 
         ui->actionConnect_ZWO->setEnabled(false);
         ui->actionDisconect_ZWO->setEnabled(false);
         ui->actionPhoto->setEnabled(false);
+        ui->actionVideo->setEnabled(false);
     }
     else{
         ui->actionConnect_ZWO->setEnabled(true);
         ui->actionDisconect_ZWO->setEnabled(false);
         ui->actionPhoto->setEnabled(false);
+        ui->actionVideo->setEnabled(false);
     }
 
 
@@ -837,6 +862,8 @@ void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int heigh
 
     m_photo->convertFromImage(*m_image,Qt::AutoColor);
     m_photo->devicePixelRatioFScale();
+
+    m_scene->clear();
     m_scene->addPixmap(*m_photo);
     ui->graphicsView->setScene(m_scene);
 
@@ -881,5 +908,26 @@ void MainWindow::endMeasure()
 
 void MainWindow::statutMeasure(const int pourcentage){
 
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] State of mesure : " <<pourcentage ;
     ui->progressBar->setValue(pourcentage);
+}
+
+void MainWindow::buttonVideoActivate(){
+
+    m_videoRun = true;
+    ui->actionConnect_ZWO->setEnabled(false);
+    ui->actionDisconect_ZWO->setEnabled(true);
+    ui->actionPhoto->setEnabled(false);
+    ui->actionVideo->setEnabled(false);
+    ui->button_Start_Measure->setEnabled(false);
+}
+
+void MainWindow::buttonVideoDesactivate(){
+
+    ui->actionConnect_ZWO->setEnabled(true);
+    ui->actionDisconect_ZWO->setEnabled(false);
+    ui->actionPhoto->setEnabled(false);
+    ui->actionVideo->setEnabled(false);
+    ui->button_Start_Measure->setEnabled(false);
+
 }

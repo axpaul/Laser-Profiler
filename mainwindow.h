@@ -89,6 +89,8 @@ public slots :
 
     void showImage(ASI_IMG_TYPE format, const int width, const int height, const QImage frame);
 
+    void buttonVideoActivate();
+
     // Measure
 
     void startMeasure();
@@ -125,6 +127,8 @@ private:
     void buttonCameraActivate();
     void buttonCameraDesactivate();
 
+    void buttonVideoDesactivate();
+
     void showStatusMessage(const QString &stringConnection);
 
      Ui::MainWindow *ui;
@@ -139,6 +143,7 @@ private:
 
      SerialPort *m_serial;
      bool m_serialRun;
+     bool m_videoRun;
 
      Console *console;
 

@@ -27,5 +27,6 @@
         <file>icone/1F4F8-camera-with-flash-512.png</file>
         <file>icone/icons8-ajouter-appareil-photo-96.png</file>
         <file>icone/icons8-pas-d'appareil-photo-100.png</file>
+        <file>icone/video-camera.png</file>
     </qresource>
 </RCC>

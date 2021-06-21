@@ -9,26 +9,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1009</width>
-    <height>721</height>
+    <width>933</width>
+    <height>654</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>LaserProfiler 2.3</string>
+   <string>LaserProfiler 2.4</string>
   </property>
   <property name="windowIcon">
    <iconset resource="icone.qrc">
     <normaloff>:/iconeWindows/icone/saber.png</normaloff>:/iconeWindows/icone/saber.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="3">
-     <widget class="QLabel" name="label_console">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
+   <layout class="QFormLayout" name="formLayout">
     <item row="0" column="0">
      <widget class="QScrollArea" name="scrollArea">
       <property name="maximumSize">
@@ -44,8 +37,8 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-142</y>
-         <width>468</width>
+         <y>0</y>
+         <width>449</width>
          <height>774</height>
         </rect>
        </property>
@@ -349,7 +342,7 @@
                   <double>5.000000000000000</double>
                  </property>
                  <property name="value">
-                  <double>1.000000000000000</double>
+                  <double>0.100000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -964,7 +957,7 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="2">
+    <item row="0" column="1">
      <widget class="QGraphicsView" name="graphicsView"/>
     </item>
    </layout>
@@ -974,20 +967,16 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1009</width>
+     <width>933</width>
      <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnect">
     <property name="title">
-     <string>main</string>
+     <string>Main</string>
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
-    <addaction name="separator"/>
-    <addaction name="actionConnect_ZWO"/>
-    <addaction name="actionDisconect_ZWO"/>
-    <addaction name="actionPhoto"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -1005,8 +994,19 @@
     <addaction name="actionAbout"/>
     <addaction name="actionAbout_Qt"/>
    </widget>
+   <widget class="QMenu" name="menuCamera">
+    <property name="title">
+     <string>Camera</string>
+    </property>
+    <addaction name="actionConnect_ZWO"/>
+    <addaction name="actionDisconect_ZWO"/>
+    <addaction name="separator"/>
+    <addaction name="actionPhoto"/>
+    <addaction name="actionVideo"/>
+   </widget>
    <addaction name="menuConnect"/>
    <addaction name="menuTools"/>
+   <addaction name="menuCamera"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -1021,6 +1021,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPhoto"/>
+   <addaction name="actionVideo"/>
    <addaction name="actionConnect_ZWO"/>
    <addaction name="actionDisconect_ZWO"/>
    <addaction name="separator"/>
@@ -1122,6 +1123,18 @@
    </property>
    <property name="text">
     <string>Photo</string>
+   </property>
+  </action>
+  <action name="actionVideo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icone.qrc">
+     <normaloff>:/iconePhoto/icone/video-camera.png</normaloff>:/iconePhoto/icone/video-camera.png</iconset>
+   </property>
+   <property name="text">
+    <string>Video</string>
    </property>
   </action>
  </widget>

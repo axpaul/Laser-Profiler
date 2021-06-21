@@ -130,6 +130,9 @@ ASI_ERROR_CODE AsiCamera::closeCamera()
 
     if (m_askVideo == true)
     {
+
+        m_videoStart = false;
+
         m_error = ASIStopVideoCapture(pASICameraInfo->CameraID);
 
         if (m_error != ASI_SUCCESS)
@@ -1295,14 +1298,22 @@ ASI_ERROR_CODE AsiCamera::controlVideo()
 
     while(m_videoStart == true){
 
-        if(ASIGetVideoData(pASICameraInfo->CameraID,m_frame->bits(), m_frame->sizeInBytes(), -1) == ASI_SUCCESS) {
+        m_error = ASIGetVideoData(pASICameraInfo->CameraID,m_frame->bits(), m_frame->sizeInBytes(), -1);
 
+        if(m_error == ASI_SUCCESS) {
             sendControlValue();
             emit sigImageReception(m_piformat, m_piWidth, m_piHeight, *m_frame);
 
             qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][Camera] Video Image";
 
         }
+        else
+        {
+           emit sigErrorCamera(m_error);
+           return m_error;
+        }
+
+        QThread::usleep(10);
     }
 
 

@@ -1,6 +1,8 @@
 #ifndef MEASURE_H
 #define MEASURE_H
 
+#include <QObject>
+#include <QWidget>
 #include <QThread>
 #include <QObject>
 #include <QImage>

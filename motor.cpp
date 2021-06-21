@@ -97,6 +97,8 @@ void Motor::closeSerial()
 
 void Motor::movingPosition()
 {
+
+
     QByteArray cmd;
     int counterMax(0), counter(0);
 
@@ -179,10 +181,14 @@ void Motor::movingPosition()
 
     emit endMove(m_positionActu);
     m_positionApply = false;
+
+
 }
 
 void Motor::movingHome()
 {
+
+
     emit doHome();
 
     QByteArray cmd;
@@ -197,6 +203,7 @@ void Motor::movingHome()
     emit motorState(false, m_positionActu);
 
     m_homeApply = false;
+
 
 }
 
