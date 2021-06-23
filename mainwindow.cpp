@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_cameraRun = false;
     m_cameraControlChange = false;
     m_videoRun = false;
+    m_startMeasure = false;
 
     m_photo = new QPixmap();
     m_scene = new QGraphicsScene;

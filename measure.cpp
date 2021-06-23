@@ -21,6 +21,7 @@ void Measure::run()
     m_image = new QImage;
 
     m_error = false;
+    m_firstImage = false;
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MEASURE] " << QThread::currentThread();
     qRegisterMetaType<AsiCamera::ControlValue>();
@@ -57,7 +58,7 @@ void Measure::run()
                 sendPosition();
                 m_semSendPosition->acquire(1);
 
-               pourcentage = qRound(double(m_counter)/double(m_counterMax))*100;
+               pourcentage = qRound((double(m_counter)/double(m_counterMax))*10)*10;
                emit sigSendStateMeasure(int(pourcentage));
             }
 
@@ -102,20 +103,22 @@ void Measure::startMeasure(int max, int min, float step, QString dir){
     m_mainDir = dir;
 
     QString Images = "/Images";
-    //QString ImagesCalibrates = "/Images_to_calibrate";
+    QString ImagesCalibrates = "/Images_to_calibrate";
     m_imageDir = Images.prepend(dir);
+    m_imageCalibrateDir = ImagesCalibrates.prepend(dir);
 
 
     m_mainFolder = QDir(dir);
     m_mainFolder.mkdir("Images");
     m_mainFolder.mkdir("Images_to_calibrate");
+
     //m_imageFolder = QDir(Images.prepend(dir));
     //m_dossierImagesCalibrate = new QDir(ImagesCalibrates.prepend(dir));
 
     m_startMeasure = true;
+    m_firstImage = true;
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Start Measure";
-
 }
 
 void Measure::imageReception(ASI_IMG_TYPE format, const int width, const int height, const QImage frame)
@@ -206,23 +209,6 @@ void Measure::propretyImage()
     QString nameImage = QString("/capture_#%1_%2us.png").arg(stringCounter).arg(m_controlvalue.val_exposure);
     QString nameFile = QString("/capture_#%1_%2us_CameraSettings.txt").arg(stringCounter).arg(m_controlvalue.val_exposure);
 
-
-    nameImage.prepend(m_imageDir);
-    nameFile.prepend(m_imageDir);
-
-    QFile fileImage(nameFile);
-
-    if (!fileImage.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-        m_error = true;
-        //return;
-    }
-
-    if(!m_image->save(nameImage,"PNG"))
-    {
-        m_error = true;
-    }
-
     setProprityImage = QString("Position : %1 \n"
              "Gain : %2 \n"
              "Exposure : %3 \n"
@@ -250,10 +236,57 @@ void Measure::propretyImage()
             .arg(m_controlvalue.auto_highSpeedMode);
 
 
+    nameImage.prepend(m_imageDir);
+    nameFile.prepend(m_imageDir);
+
+    QFile fileImage(nameFile);
+
+    if (!fileImage.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        m_error = true;
+        //return;
+    }
+
+    if(!m_image->save(nameImage,"PNG"))
+    {
+        m_error = true;
+    }
+
+
     QTextStream out(&fileImage);
     out << setProprityImage;
 
     fileImage.close();
+
+    // Save in other dir only first image
+
+    if (m_firstImage)
+    {
+        m_firstImage = false;
+
+        QString nameImageOld = QString("/capture_#%1_%2us_old.png").arg(stringCounter).arg(m_controlvalue.val_exposure);
+        QString nameImageCalibrate = QString("/capture_#%1_%2us.png").arg(stringCounter).arg(m_controlvalue.val_exposure);
+
+        nameImageOld.prepend(m_imageCalibrateDir);
+        nameImageCalibrate.prepend(m_imageCalibrateDir);
+
+        // Old file
+
+        if(!m_image->save(nameImageOld,"PNG"))
+        {
+            m_error = true;
+        }
+
+
+        //Calibrate file
+
+
+        if(!m_image->save(nameImageCalibrate,"PNG"))
+        {
+            m_error = true;
+        }
+
+    }
 
     delete m_image;
 }

@@ -98,7 +98,6 @@ void Motor::closeSerial()
 void Motor::movingPosition()
 {
 
-
     QByteArray cmd;
     int counterMax(0), counter(0);
 

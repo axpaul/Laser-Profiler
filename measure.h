@@ -59,6 +59,7 @@ private :
     bool m_startMeasure;
     bool m_NewPosition;
     bool m_newImage;
+    bool m_firstImage;
 
     double m_positionMax;
     double m_positionMin;
@@ -73,6 +74,7 @@ private :
 
     QString m_mainDir;
     QString m_imageDir;
+    QString m_imageCalibrateDir;
 
     QSemaphore *m_semOpenCam;
     QSemaphore *m_semGetPhoto;
