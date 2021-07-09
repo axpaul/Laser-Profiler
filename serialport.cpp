@@ -28,6 +28,7 @@ bool SerialPort::openSerial()
         emit SerialPort::serialOpenned(this->settingsInfo());
 
         QThread::msleep(1800); // wait GRBL initialisation
+
         return true;
             }
     else

@@ -19,6 +19,7 @@
 #include "motor.h"
 #include "asicamera.h"
 #include "measure.h"
+#include "imagescene.h"
 
 #define VERSION_SERIAL 1.2f
 
@@ -33,6 +34,7 @@ class Console;
 class Motor;
 class AsiCamera;
 class Measure;
+class ImageScene;
 
 class MainWindow : public QMainWindow
 {
@@ -129,6 +131,9 @@ private:
 
     void buttonVideoDesactivate();
 
+    void buttonMeasureActive();
+    void buttonMesureDisactive();
+
     void showStatusMessage(const QString &stringConnection);
 
      Ui::MainWindow *ui;
@@ -172,6 +177,8 @@ private:
      QImage *m_image;
      QPixmap *m_photo;
      QGraphicsScene *m_scene;
+
+     ImageScene *m_imageScene;
 
      Measure *m_measure;
      bool m_startMeasure;

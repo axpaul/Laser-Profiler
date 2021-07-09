@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     asicamera.cpp \
     console.cpp \
+    imagescene.cpp \
     main.cpp \
     mainwindow.cpp \
     measure.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 HEADERS += \
     asicamera.h \
     console.h \
+    imagescene.h \
     mainwindow.h \
     measure.h \
     motor.h \
@@ -50,3 +52,5 @@ win32: LIBS += -L$$PWD/lib/x86/ -lASICamera2
 
 INCLUDEPATH += $$PWD/lib/x86
 DEPENDPATH += $$PWD/lib/x86
+
+RC_ICONS = exe.ico

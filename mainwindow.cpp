@@ -32,6 +32,13 @@ MainWindow::MainWindow(QWidget *parent)
     m_photo = new QPixmap();
     m_scene = new QGraphicsScene;
 
+    m_imageScene = new ImageScene;
+    ui->graphicsView->setScene(m_imageScene);
+    ui->graphicsView->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    ui->graphicsView->centerOn(0,0);
+    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
     m_camera->start();
 
     m_serial = new SerialPort;
@@ -218,10 +225,12 @@ void MainWindow::closedSerial() {
 }
 
 void MainWindow::openSerialPort() {
+
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss")<< "][MAINWINDOW] Send Serial open";
+
     m_serial->setSerialRun(true);
 
-    motorNobuttonAll();
+    //motorNobuttonAll();
 }
 
 void MainWindow::closeSerialPort() {
@@ -275,39 +284,6 @@ void MainWindow::applyPosition()
 {
     float position = ui->SpinBox_Position->value();
     emit sendPosition(position);
-}
-
-void MainWindow::motorbuttonActivate()
-{
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(true);
-    ui->button_Home->setEnabled(true);
-    ui->button_Position->setEnabled(true);
-    ui->button_Home->setEnabled(true);
-    ui->button_Send->setEnabled(true);
-    ui->button_Start_Measure->setEnabled(true);
-}
-
-void MainWindow::motorbuttonDisactivate()
-{
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->button_Home->setEnabled(false);
-    ui->button_Position->setEnabled(false);
-    ui->button_Home->setEnabled(false);
-    ui->button_Send->setEnabled(false);
-    ui->button_Start_Measure->setEnabled(false);
-}
-
-void MainWindow::motorNobuttonAll()
-{
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(false);
-    ui->button_Home->setEnabled(false);
-    ui->button_Position->setEnabled(false);
-    ui->button_Home->setEnabled(false);
-    ui->button_Send->setEnabled(false);
-    ui->button_Start_Measure->setEnabled(false);
 }
 
 // Camera control
@@ -397,7 +373,7 @@ void MainWindow::opennedCamera(bool state)
 {
     if (state == true){
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera openned";
-       m_cameraRun = true;
+        m_cameraRun = true;
 
         if (!m_startMeasure)
             buttonCameraActivate();
@@ -405,25 +381,27 @@ void MainWindow::opennedCamera(bool state)
         if (m_cameraControlChange)
             emit sigAllSettings(ui->spinBox_width->value(), ui->spinBox_Height->value(), 1, ui->spinBox_start_PosX->value(), ui->spinBox_start_PosY->value(), m_format, m_controlValue);
     }
+    else{
+
+    }
 
 }
 
 void MainWindow::closedCamera(bool state)
 {
-    bool endVideo = false;
+
+
     if (state == true){
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera closed";
-    if(m_videoRun){
-        m_videoRun = false;
-        endVideo = true;
-    }
+
     m_cameraRun = false;
 
-    if (!m_startMeasure || !endVideo)
+    if (!m_startMeasure)
         buttonCameraDesactivate();   
     }
-    else if (!m_startMeasure || endVideo)
-    {
+
+    if(m_videoRun){
+        m_videoRun = false;
         buttonVideoDesactivate();
     }
 }
@@ -565,85 +543,6 @@ void MainWindow::controlFomat(const int Width, const int Height, const int Bin, 
     }
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Control format receive";
-}
-
-void MainWindow::buttonCameraActivate(){
-
-    if(m_startMeasure)
-    {
-        ui->spinBox_Height->setEnabled(true);
-        ui->spinBox_width->setEnabled(true);
-        ui->spinBox_start_PosX->setEnabled(true);
-        ui->spinBox_start_PosY->setEnabled(true);
-        ui->spinBox_gain->setEnabled(true);
-        ui->spinBox_exposure->setEnabled(true);
-        ui->spinBox_offset->setEnabled(true);
-        ui->spinBox_bandWidh->setEnabled(true);
-        ui->lcdNumber_temperature->setEnabled(true);
-        ui->spinBox_flip->setEnabled(true);
-        ui->spinBox_autoExpMaxGain->setEnabled(true);
-        ui->spinBox_autoExpMaxExpMS->setEnabled(true);
-        ui->spinBox_autoExpTargetBrightness->setEnabled(true);
-        ui->spinBox_harwareBin->setEnabled(true);
-        ui->spinBox_highSpeedMode->setEnabled(true);
-        ui->Button_apply_camera->setEnabled(true);
-        ui->checkBox_gain->setEnabled(true);
-        ui->checkBox_bandWidh->setEnabled(true);
-        ui->checkBox_exposure->setEnabled(true);
-        ui->checkBox_Camera_Parameters->setEnabled(true);
-
-        ui->actionConnect_ZWO->setEnabled(true);
-        ui->actionDisconect_ZWO->setEnabled(false);
-        ui->actionPhoto->setEnabled(false);
-        ui->actionVideo->setEnabled(false);
-     }
-    else{
-        ui->actionConnect_ZWO->setEnabled(false);
-        ui->actionDisconect_ZWO->setEnabled(true);
-        ui->actionPhoto->setEnabled(true);
-        ui->actionVideo->setEnabled(true);
-    }
-
-}
-
-void MainWindow::buttonCameraDesactivate(){
-
-    if(m_startMeasure)
-    {
-        ui->spinBox_Height->setEnabled(false);
-        ui->spinBox_width->setEnabled(false);
-        ui->spinBox_start_PosX->setEnabled(false);
-        ui->spinBox_start_PosY->setEnabled(false);
-        ui->spinBox_gain->setEnabled(false);
-        ui->spinBox_exposure->setEnabled(false);
-        ui->spinBox_offset->setEnabled(false);
-        ui->spinBox_bandWidh->setEnabled(false);
-        ui->lcdNumber_temperature->setEnabled(false);
-        ui->spinBox_flip->setEnabled(false);
-        ui->spinBox_autoExpMaxGain->setEnabled(false);
-        ui->spinBox_autoExpMaxExpMS->setEnabled(false);
-        ui->spinBox_autoExpTargetBrightness->setEnabled(false);
-        ui->spinBox_harwareBin->setEnabled(false);
-        ui->spinBox_highSpeedMode->setEnabled(false);
-        ui->Button_apply_camera->setEnabled(false);
-        ui->checkBox_gain->setEnabled(false);
-        ui->checkBox_bandWidh->setEnabled(false);
-        ui->checkBox_exposure->setEnabled(false);
-        ui->checkBox_Camera_Parameters->setEnabled(false);
-
-        ui->actionConnect_ZWO->setEnabled(false);
-        ui->actionDisconect_ZWO->setEnabled(false);
-        ui->actionPhoto->setEnabled(false);
-        ui->actionVideo->setEnabled(false);
-    }
-    else{
-        ui->actionConnect_ZWO->setEnabled(true);
-        ui->actionDisconect_ZWO->setEnabled(false);
-        ui->actionPhoto->setEnabled(false);
-        ui->actionVideo->setEnabled(false);
-    }
-
-
 }
 
 void MainWindow::controlValue(const AsiCamera::ControlValue controlvalue, const AsiCamera::ControlIndex index, const int piNumberOfControls)
@@ -846,6 +745,7 @@ void MainWindow::setSettingsCamera(){
 
 void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int height, const QImage frame)
 {
+
     if (format == ASI_IMG_RAW8)
     {
         m_image = new QImage(width, height, QImage::Format_Grayscale8);
@@ -864,9 +764,14 @@ void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int heigh
     m_photo->convertFromImage(*m_image,Qt::AutoColor);
     m_photo->devicePixelRatioFScale();
 
+    m_imageScene->loadImage(*m_photo);
+
+    /*m_scene->setMinimumRenderSize(0);
     m_scene->clear();
-    m_scene->addPixmap(*m_photo);
-    ui->graphicsView->setScene(m_scene);
+    m_scene->addPixmap(*m_photo);*/
+
+
+    ui->graphicsView->setScene(m_imageScene);
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] New Image";
 
@@ -881,7 +786,7 @@ void MainWindow::startMeasure()
     QString dir = "";
     dir = QFileDialog::getExistingDirectory(this, "Open Directory", "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    setSettingsCamera();
+    allSettings();
 
     m_startMeasure = true;
     ui->checkBox_Camera_Parameters->setCheckable(false);
@@ -913,9 +818,12 @@ void MainWindow::statutMeasure(const int pourcentage){
     ui->progressBar->setValue(pourcentage);
 }
 
+//Button control
+
 void MainWindow::buttonVideoActivate(){
 
     m_videoRun = true;
+
     ui->actionConnect_ZWO->setEnabled(false);
     ui->actionDisconect_ZWO->setEnabled(true);
     ui->actionPhoto->setEnabled(false);
@@ -929,6 +837,132 @@ void MainWindow::buttonVideoDesactivate(){
     ui->actionDisconect_ZWO->setEnabled(false);
     ui->actionPhoto->setEnabled(false);
     ui->actionVideo->setEnabled(false);
+    ui->button_Start_Measure->setEnabled(true);
+
+}
+
+void MainWindow::motorbuttonActivate()
+{
+    ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(true);
+    ui->button_Home->setEnabled(true);
+    ui->button_Position->setEnabled(true);
+    ui->button_Home->setEnabled(true);
+    ui->button_Send->setEnabled(true);
+    ui->button_Start_Measure->setEnabled(true);
+}
+
+void MainWindow::motorbuttonDisactivate()
+{
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->button_Home->setEnabled(false);
+    ui->button_Position->setEnabled(false);
+    ui->button_Home->setEnabled(false);
+    ui->button_Send->setEnabled(false);
     ui->button_Start_Measure->setEnabled(false);
+}
+
+void MainWindow::motorNobuttonAll()
+{
+    ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(false);
+    ui->button_Home->setEnabled(false);
+    ui->button_Position->setEnabled(false);
+    ui->button_Home->setEnabled(false);
+    ui->button_Send->setEnabled(false);
+    ui->button_Start_Measure->setEnabled(false);
+}
+
+void MainWindow::buttonCameraActivate(){
+
+        /*ui->spinBox_Height->setEnabled(true);
+        ui->spinBox_width->setEnabled(true);
+        ui->spinBox_start_PosX->setEnabled(true);
+        ui->spinBox_start_PosY->setEnabled(true);
+        ui->spinBox_gain->setEnabled(true);
+        ui->spinBox_exposure->setEnabled(true);
+        ui->spinBox_offset->setEnabled(true);
+        ui->spinBox_bandWidh->setEnabled(true);
+        ui->lcdNumber_temperature->setEnabled(true);
+        ui->spinBox_flip->setEnabled(true);
+        ui->spinBox_autoExpMaxGain->setEnabled(true);
+        ui->spinBox_autoExpMaxExpMS->setEnabled(true);
+        ui->spinBox_autoExpTargetBrightness->setEnabled(true);
+        ui->spinBox_harwareBin->setEnabled(true);
+        ui->spinBox_highSpeedMode->setEnabled(true);
+        ui->Button_apply_camera->setEnabled(true);
+        ui->checkBox_gain->setEnabled(true);
+        ui->checkBox_bandWidh->setEnabled(true);
+        ui->checkBox_exposure->setEnabled(true);
+        ui->checkBox_Camera_Parameters->setEnabled(true);*/
+
+        ui->actionConnect_ZWO->setEnabled(false);
+        ui->actionDisconect_ZWO->setEnabled(true);
+        ui->actionPhoto->setEnabled(true);
+        ui->actionVideo->setEnabled(true);
+}
+
+void MainWindow::buttonCameraDesactivate(){
+
+
+        /*ui->spinBox_Height->setEnabled(false);
+        ui->spinBox_width->setEnabled(false);
+        ui->spinBox_start_PosX->setEnabled(false);
+        ui->spinBox_start_PosY->setEnabled(false);
+        ui->spinBox_gain->setEnabled(false);
+        ui->spinBox_exposure->setEnabled(false);
+        ui->spinBox_offset->setEnabled(false);
+        ui->spinBox_bandWidh->setEnabled(false);
+        ui->lcdNumber_temperature->setEnabled(false);
+        ui->spinBox_flip->setEnabled(false);
+        ui->spinBox_autoExpMaxGain->setEnabled(false);
+        ui->spinBox_autoExpMaxExpMS->setEnabled(false);
+        ui->spinBox_autoExpTargetBrightness->setEnabled(false);
+        ui->spinBox_harwareBin->setEnabled(false);
+        ui->spinBox_highSpeedMode->setEnabled(false);
+        ui->Button_apply_camera->setEnabled(false);
+        ui->checkBox_gain->setEnabled(false);
+        ui->checkBox_bandWidh->setEnabled(false);
+        ui->checkBox_exposure->setEnabled(false);
+        ui->checkBox_Camera_Parameters->setEnabled(false);*/
+
+        ui->actionConnect_ZWO->setEnabled(true);
+        ui->actionDisconect_ZWO->setEnabled(false);
+        ui->actionPhoto->setEnabled(false);
+        ui->actionVideo->setEnabled(false);
+
+}
+
+void MainWindow::buttonMeasureActive(){
+
+}
+void MainWindow::buttonMesureDisactive(){
+
+    ui->spinBox_Height->setEnabled(false);
+    ui->spinBox_width->setEnabled(false);
+    ui->spinBox_start_PosX->setEnabled(false);
+    ui->spinBox_start_PosY->setEnabled(false);
+    ui->spinBox_gain->setEnabled(false);
+    ui->spinBox_exposure->setEnabled(false);
+    ui->spinBox_offset->setEnabled(false);
+    ui->spinBox_bandWidh->setEnabled(false);
+    ui->lcdNumber_temperature->setEnabled(false);
+    ui->spinBox_flip->setEnabled(false);
+    ui->spinBox_autoExpMaxGain->setEnabled(false);
+    ui->spinBox_autoExpMaxExpMS->setEnabled(false);
+    ui->spinBox_autoExpTargetBrightness->setEnabled(false);
+    ui->spinBox_harwareBin->setEnabled(false);
+    ui->spinBox_highSpeedMode->setEnabled(false);
+    ui->Button_apply_camera->setEnabled(false);
+    ui->checkBox_gain->setEnabled(false);
+    ui->checkBox_bandWidh->setEnabled(false);
+    ui->checkBox_exposure->setEnabled(false);
+    ui->checkBox_Camera_Parameters->setEnabled(false);
+
+    ui->actionConnect_ZWO->setEnabled(true);
+    ui->actionDisconect_ZWO->setEnabled(false);
+    ui->actionPhoto->setEnabled(false);
+    ui->actionVideo->setEnabled(false);
 
 }
