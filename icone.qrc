@@ -29,5 +29,6 @@
         <file>icone/icons8-pas-d'appareil-photo-100.png</file>
         <file>icone/video-camera.png</file>
         <file>icone/manometer.png</file>
+        <file>icone/setting.png</file>
     </qresource>
 </RCC>

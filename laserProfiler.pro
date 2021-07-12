@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     asicamera.cpp \
+    calibration.cpp \
     console.cpp \
     imagescene.cpp \
     main.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     asicamera.h \
+    calibration.h \
     console.h \
     imagescene.h \
     mainwindow.h \

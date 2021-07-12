@@ -12,6 +12,7 @@
 #include <QGraphicsScene>
 #include <QFile>
 #include <QFileDialog>
+#include <QMutex>
 
 #include "console.h"
 #include "serialport.h"
@@ -79,7 +80,6 @@ public slots :
 
     void opennedCamera(bool state);
     void closedCamera(bool state);
-    void imageRecept();
 
     void cameraInfo(const ASI_CAMERA_INFO cameraInfo);
 
@@ -99,9 +99,12 @@ public slots :
     void endMeasure();
     void statutMeasure(const int pourcentage);
 
+    // Calibrate
+
+    void startCalibration();
+
 private slots :
     void about();
-
 
 signals:
 
@@ -164,7 +167,6 @@ private:
      AsiCamera::ControlIndex m_index;
      int m_numberOfControls;
 
-
      int m_width;
      int m_height;
      int m_bin;
@@ -177,6 +179,7 @@ private:
      QImage *m_image;
      QPixmap *m_photo;
      QGraphicsScene *m_scene;
+     QMutex m_mut;
 
      ImageScene *m_imageScene;
 

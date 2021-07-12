@@ -164,6 +164,9 @@ void MainWindow::initActionsConnections(){
     connect(m_camera, &AsiCamera::sigImageReception, m_measure, &Measure::imageReception);
 
     connect(m_camera, &AsiCamera::sigControlValueAlone, m_measure, &Measure::controlValueMeasure);
+    connect(m_camera, &AsiCamera::sigcontrolValue, this, &MainWindow::controlValue);
+
+    connect(ui->button_calibration, &QPushButton::clicked, this, &MainWindow::startCalibration);
 }
 
 /* MainWindow Information */
@@ -375,7 +378,7 @@ void MainWindow::opennedCamera(bool state)
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera openned";
         m_cameraRun = true;
 
-        if (!m_startMeasure)
+        if (m_startMeasure == false)
             buttonCameraActivate();
 
         if (m_cameraControlChange)
@@ -389,14 +392,12 @@ void MainWindow::opennedCamera(bool state)
 
 void MainWindow::closedCamera(bool state)
 {
-
-
     if (state == true){
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera closed";
 
     m_cameraRun = false;
 
-    if (!m_startMeasure)
+    if (m_startMeasure == false)
         buttonCameraDesactivate();   
     }
 
@@ -409,7 +410,6 @@ void MainWindow::closedCamera(bool state)
 void MainWindow::openCamera(){
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss")<< "][MAINWINDOW] Send open camera";
     m_camera->askConnect();
-
 }
 
 void MainWindow::closeCamera()
@@ -424,17 +424,11 @@ void MainWindow::askTakeImage()
     m_camera->askPhoto();
 }
 
-void MainWindow::imageRecept()
-{
-
-}
-
 void MainWindow::cameraInfo(ASI_CAMERA_INFO cameraInfo){
 
     ui->label_Resolution->setText(QString("Resolution : %1x%2").arg(cameraInfo.MaxWidth).arg(cameraInfo.MaxHeight));
     ui->spinBox_Height->setMaximum(cameraInfo.MaxHeight);
     ui->spinBox_width->setMaximum(cameraInfo.MaxWidth);
-
 }
 
 void MainWindow::controlCap(const AsiCamera::AllControlCAP controlCap, const AsiCamera::ControlIndex index, const int piNumberOfControls)
@@ -547,61 +541,66 @@ void MainWindow::controlFomat(const int Width, const int Height, const int Bin, 
 
 void MainWindow::controlValue(const AsiCamera::ControlValue controlvalue, const AsiCamera::ControlIndex index, const int piNumberOfControls)
 {
-    for (int i = 0 ; i < piNumberOfControls ; i++)
-    {
 
-        if (i == index.ind_gain)
+    if(ui->checkBox_Camera_Parameters->isChecked()){
+
+        for (int i = 0 ; i < piNumberOfControls ; i++)
         {
-            ui->spinBox_gain->setValue(controlvalue.val_gain);
-            ui->checkBox_gain->setChecked(controlvalue.auto_gain);
+
+            if (i == index.ind_gain)
+            {
+                ui->spinBox_gain->setValue(controlvalue.val_gain);
+                ui->checkBox_gain->setChecked(controlvalue.auto_gain);
+
+            }
+            else if (i == index.ind_exposure)
+            {
+                ui->spinBox_exposure->setValue(controlvalue.val_exposure);
+                ui->checkBox_exposure->setChecked(controlvalue.auto_exposure);
+            }
+            else if (i == index.ind_offset)
+            {
+                ui->spinBox_offset->setValue(controlvalue.val_offset);
+            }
+            else if (i == index.ind_bandWidth)
+            {
+                ui->spinBox_bandWidh->setValue(controlvalue.val_bandWidth);
+                ui->checkBox_bandWidh->setChecked(controlvalue.auto_bandWidth);
+            }
+            else if (i == index.ind_temperature)
+            {
+                ui->lcdNumber_temperature->display(int(controlvalue.val_temperature));
+            }
+            else if (i == index.ind_flip)
+            {
+                ui->spinBox_flip->setValue(controlvalue.val_flip);
+            }
+            else if (i == index.ind_autoExpMaxGain)
+            {
+                ui->spinBox_autoExpMaxGain->setValue(controlvalue.val_autoExpMaxGain);
+            }
+            else if (i == index.ind_autoExpMaxExpMS)
+            {
+                ui->spinBox_autoExpMaxExpMS->setValue(controlvalue.val_autoExpMaxExpMS);
+            }
+            else if (i == index.ind_autoExpTargetBrightness)
+            {
+                ui->spinBox_autoExpTargetBrightness->setValue(controlvalue.val_autoExpTargetBrightness);
+            }
+            else if (i == index.ind_harwareBin)
+            {
+                ui->spinBox_harwareBin->setValue(controlvalue.val_harwareBin);
+            }
+            else if (i == index.ind_highSpeedMode)
+            {
+                ui->spinBox_highSpeedMode->setValue(controlvalue.val_highSpeedMode);
+            }
 
         }
-        else if (i == index.ind_exposure)
-        {
-            ui->spinBox_exposure->setValue(controlvalue.val_exposure);
-            ui->checkBox_exposure->setChecked(controlvalue.auto_exposure);
-        }
-        else if (i == index.ind_offset)
-        {
-            ui->spinBox_offset->setValue(controlvalue.val_offset);
-        }
-        else if (i == index.ind_bandWidth)
-        {
-            ui->spinBox_bandWidh->setValue(controlvalue.val_bandWidth);
-            ui->checkBox_bandWidh->setChecked(controlvalue.auto_bandWidth);
-        }
-        else if (i == index.ind_temperature)
-        {
-            ui->lcdNumber_temperature->display(int(controlvalue.val_temperature));
-        }
-        else if (i == index.ind_flip)
-        {
-            ui->spinBox_flip->setValue(controlvalue.val_flip);
-        }
-        else if (i == index.ind_autoExpMaxGain)
-        {
-            ui->spinBox_autoExpMaxGain->setValue(controlvalue.val_autoExpMaxGain);
-        }
-        else if (i == index.ind_autoExpMaxExpMS)
-        {
-            ui->spinBox_autoExpMaxExpMS->setValue(controlvalue.val_autoExpMaxExpMS);
-        }
-        else if (i == index.ind_autoExpTargetBrightness)
-        {
-            ui->spinBox_autoExpTargetBrightness->setValue(controlvalue.val_autoExpTargetBrightness);
-        }
-        else if (i == index.ind_harwareBin)
-        {
-            ui->spinBox_harwareBin->setValue(controlvalue.val_harwareBin);
-        }
-        else if (i == index.ind_highSpeedMode)
-        {
-            ui->spinBox_highSpeedMode->setValue(controlvalue.val_highSpeedMode);
-        }
+
+        qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Receive actual settings of Camera";
 
     }
-
-    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Receive actual settings of Camera";
 
 }
 
@@ -743,6 +742,7 @@ void MainWindow::setSettingsCamera(){
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Set settings camera";
 }
 
+
 void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int height, const QImage frame)
 {
 
@@ -764,7 +764,7 @@ void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int heigh
     m_photo->convertFromImage(*m_image,Qt::AutoColor);
     m_photo->devicePixelRatioFScale();
 
-    m_imageScene->loadImage(*m_photo);
+    m_imageScene->loadImage(ui->checkBox_grid->isChecked(),*m_photo);
 
     /*m_scene->setMinimumRenderSize(0);
     m_scene->clear();
@@ -775,6 +775,8 @@ void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int heigh
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] New Image";
 
+    //m_calibration = true;
+
     delete m_image;
 
 }
@@ -783,16 +785,17 @@ void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int heigh
 
 void MainWindow::startMeasure()
 {
+
+    m_startMeasure = true;
     QString dir = "";
     dir = QFileDialog::getExistingDirectory(this, "Open Directory", "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     allSettings();
 
-    m_startMeasure = true;
-    ui->checkBox_Camera_Parameters->setCheckable(false);
+    ui->checkBox_Camera_Parameters->setCheckable(true);
     ui->checkBox_Camera_Parameters->setEnabled(false);
 
-    buttonCameraDesactivate();
+    buttonMeasureActive();
     motorNobuttonAll();
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Start Measure";
@@ -801,7 +804,7 @@ void MainWindow::startMeasure()
 
 void MainWindow::endMeasure()
 {
-    buttonCameraActivate();
+    buttonMesureDisactive();
     motorbuttonActivate();
     m_startMeasure = false;
     ui->checkBox_Camera_Parameters->setCheckable(false);
@@ -818,6 +821,15 @@ void MainWindow::statutMeasure(const int pourcentage){
     ui->progressBar->setValue(pourcentage);
 }
 
+// Calibration
+
+void MainWindow::startCalibration(){
+    //m_calibration = true;
+    ui->label_CalibrationState->setText("Calibration States : calibration is in progress");
+
+    allSettings();
+}
+
 //Button control
 
 void MainWindow::buttonVideoActivate(){
@@ -829,6 +841,14 @@ void MainWindow::buttonVideoActivate(){
     ui->actionPhoto->setEnabled(false);
     ui->actionVideo->setEnabled(false);
     ui->button_Start_Measure->setEnabled(false);
+    ui->spinBox_Height->setEnabled(false);
+    ui->spinBox_width->setEnabled(false);
+    ui->spinBox_start_PosX->setEnabled(false);
+    ui->spinBox_start_PosY->setEnabled(false);
+    ui->comboBox_format->setEnabled(false);
+
+    ui->button_calibration->setEnabled(true);
+
 }
 
 void MainWindow::buttonVideoDesactivate(){
@@ -838,6 +858,12 @@ void MainWindow::buttonVideoDesactivate(){
     ui->actionPhoto->setEnabled(false);
     ui->actionVideo->setEnabled(false);
     ui->button_Start_Measure->setEnabled(true);
+    ui->button_calibration->setEnabled(false);
+    ui->spinBox_Height->setEnabled(true);
+    ui->spinBox_width->setEnabled(true);
+    ui->spinBox_start_PosX->setEnabled(true);
+    ui->spinBox_start_PosY->setEnabled(true);
+    ui->comboBox_format->setEnabled(true);
 
 }
 
@@ -901,6 +927,7 @@ void MainWindow::buttonCameraActivate(){
         ui->actionDisconect_ZWO->setEnabled(true);
         ui->actionPhoto->setEnabled(true);
         ui->actionVideo->setEnabled(true);
+
 }
 
 void MainWindow::buttonCameraDesactivate(){
@@ -925,7 +952,7 @@ void MainWindow::buttonCameraDesactivate(){
         ui->checkBox_gain->setEnabled(false);
         ui->checkBox_bandWidh->setEnabled(false);
         ui->checkBox_exposure->setEnabled(false);
-        ui->checkBox_Camera_Parameters->setEnabled(false);*/
+        ui->checkBox_Camera_Parameters->setEnabled(true);*/
 
         ui->actionConnect_ZWO->setEnabled(true);
         ui->actionDisconect_ZWO->setEnabled(false);
@@ -935,9 +962,6 @@ void MainWindow::buttonCameraDesactivate(){
 }
 
 void MainWindow::buttonMeasureActive(){
-
-}
-void MainWindow::buttonMesureDisactive(){
 
     ui->spinBox_Height->setEnabled(false);
     ui->spinBox_width->setEnabled(false);
@@ -958,7 +982,37 @@ void MainWindow::buttonMesureDisactive(){
     ui->checkBox_gain->setEnabled(false);
     ui->checkBox_bandWidh->setEnabled(false);
     ui->checkBox_exposure->setEnabled(false);
-    ui->checkBox_Camera_Parameters->setEnabled(false);
+    ui->checkBox_Camera_Parameters->setEnabled(true);
+
+    ui->actionConnect_ZWO->setEnabled(false);
+    ui->actionDisconect_ZWO->setEnabled(false);
+    ui->actionPhoto->setEnabled(false);
+    ui->actionVideo->setEnabled(false);
+
+}
+
+void MainWindow::buttonMesureDisactive(){
+
+    ui->spinBox_Height->setEnabled(true);
+    ui->spinBox_width->setEnabled(true);
+    ui->spinBox_start_PosX->setEnabled(true);
+    ui->spinBox_start_PosY->setEnabled(true);
+    ui->spinBox_gain->setEnabled(true);
+    ui->spinBox_exposure->setEnabled(true);
+    ui->spinBox_offset->setEnabled(true);
+    ui->spinBox_bandWidh->setEnabled(true);
+    ui->lcdNumber_temperature->setEnabled(true);
+    ui->spinBox_flip->setEnabled(true);
+    ui->spinBox_autoExpMaxGain->setEnabled(true);
+    ui->spinBox_autoExpMaxExpMS->setEnabled(true);
+    ui->spinBox_autoExpTargetBrightness->setEnabled(true);
+    ui->spinBox_harwareBin->setEnabled(true);
+    ui->spinBox_highSpeedMode->setEnabled(true);
+    ui->Button_apply_camera->setEnabled(true);
+    ui->checkBox_gain->setEnabled(true);
+    ui->checkBox_bandWidh->setEnabled(true);
+    ui->checkBox_exposure->setEnabled(true);
+    ui->checkBox_Camera_Parameters->setEnabled(true);
 
     ui->actionConnect_ZWO->setEnabled(true);
     ui->actionDisconect_ZWO->setEnabled(false);

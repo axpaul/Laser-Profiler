@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1020</width>
-    <height>526</height>
+    <width>984</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -45,11 +45,11 @@
       <property name="maximumSize">
        <size>
         <width>390</width>
-        <height>420</height>
+        <height>410</height>
        </size>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -622,7 +622,7 @@
                </property>
                <property name="icon">
                 <iconset resource="icone.qrc">
-                 <normaloff>:/iconeMotor/icone/checked.png</normaloff>:/iconeMotor/icone/checked.png</iconset>
+                 <normaloff>:/iconePhoto/icone/setting.png</normaloff>:/iconePhoto/icone/setting.png</iconset>
                </property>
               </widget>
              </item>
@@ -637,6 +637,26 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line_20">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -739,6 +759,12 @@
                  </item>
                  <item>
                   <widget class="QLCDNumber" name="lcdNumber">
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>20</height>
+                    </size>
+                   </property>
                    <property name="frameShadow">
                     <enum>QFrame::Plain</enum>
                    </property>
@@ -874,6 +900,19 @@
                   </layout>
                  </item>
                 </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </item>
@@ -1131,13 +1170,12 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_29">
              <item>
-              <widget class="QPushButton" name="button_calibration">
+              <widget class="QCheckBox" name="checkBox_grid">
                <property name="text">
-                <string> Calibration</string>
+                <string>grid display (ecrean viewer)</string>
                </property>
-               <property name="icon">
-                <iconset resource="icone.qrc">
-                 <normaloff>:/iconePhoto/icone/manometer.png</normaloff>:/iconePhoto/icone/manometer.png</iconset>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -1158,7 +1196,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QDoubleSpinBox" name="spinBox_Max_2">
+                <widget class="QDoubleSpinBox" name="spinBox_max_calibration">
                  <property name="decimals">
                   <number>1</number>
                  </property>
@@ -1178,7 +1216,7 @@
                 </widget>
                </item>
                <item row="1" column="1">
-                <widget class="QDoubleSpinBox" name="spinBox_Min_2">
+                <widget class="QDoubleSpinBox" name="spinBox_min_calibration">
                  <property name="decimals">
                   <number>1</number>
                  </property>
@@ -1198,6 +1236,20 @@
             <widget class="Line" name="line_19">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="button_calibration">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string> Calibration</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icone.qrc">
+               <normaloff>:/iconePhoto/icone/manometer.png</normaloff>:/iconePhoto/icone/manometer.png</iconset>
              </property>
             </widget>
            </item>
@@ -1247,7 +1299,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1020</width>
+     <width>984</width>
      <height>21</height>
     </rect>
    </property>

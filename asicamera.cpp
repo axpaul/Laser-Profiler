@@ -1303,7 +1303,6 @@ ASI_ERROR_CODE AsiCamera::controlVideo()
         if(m_error == ASI_SUCCESS) {
             sendControlValue();
             emit sigImageReception(m_piformat, m_piWidth, m_piHeight, *m_frame);
-
             qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][Camera] Video Image";
 
         }

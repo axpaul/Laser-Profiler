@@ -13,7 +13,7 @@ ImageScene::ImageScene(QObject *parent)
 
 }
 
-void ImageScene::loadImage(const QPixmap image){
+void ImageScene::loadImage(bool showGrid, const QPixmap image){
 
     if(!(m_image == nullptr))
         delete m_image;
@@ -23,9 +23,11 @@ void ImageScene::loadImage(const QPixmap image){
     *m_image = m_image->scaled(620,410,Qt::IgnoreAspectRatio,Qt::FastTransformation);
     addPixmap(*m_image);
 
-    for(int i = 0; i < 10; i++)
-    {
-        addLine(0, i*41, 620, i *41, QPen(Qt::red));
-        addLine(i*62, 0, i *62, 416, QPen(Qt::red));
+    if (showGrid == true){
+        for(int i = 0; i < 10; i++)
+        {
+            addLine(0, i*41, 620, i *41, QPen(Qt::red));
+            addLine(i*62, 0, i *62, 416, QPen(Qt::red));
+        }
     }
 }

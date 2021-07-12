@@ -12,7 +12,7 @@ public:
     ImageScene(QObject * parent = Q_NULLPTR);
     //~ImageScene();
 
-    void loadImage(const QPixmap image);
+    void loadImage(bool showGrid, const QPixmap image);
 
 private:
     QPixmap *m_image = nullptr;
