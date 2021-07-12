@@ -20,22 +20,30 @@ class Calibration : public QThread
 public:
     Calibration();
 
+    void run();
+
     void askOpenCamera();
     void askTakePhoto();
-    void calibration(QImage frame);
+    void calibration();
 
 public slots :
     void imageReception(ASI_IMG_TYPE format, const int width, const int height, const QImage frame);
 
-    void startCalibration(int max, int min, float step, QString dir);
+    void startCalibration(int max, int min, AsiCamera::ControlValue controlvalue);
     void endCalibration();
 
     void oppenedCameraCalibration();
     void closedCameraCalibration();
 
+    void controlValueCalibration(AsiCamera::ControlValue controlvalue);
+
 signals :
     void sigOpenCameraMeasure();
     void sigTakePhotoMeasure();
+    void sigEndCalibration();
+
+    void sigPixelSaturation(int saturation);
+    void sigNewControlValue(AsiCamera::ControlValue controlvalue);
 
 private:
 
@@ -44,10 +52,16 @@ private:
 
     QSemaphore *m_semOpenCam;
     QSemaphore *m_semGetPhoto;
+    QSemaphore *m_semCalibration;
+
+    int m_maxPixel;
+    int m_minPixel;
 
     bool m_error;
-
-    bool m_calibration;
+    bool m_startCalibration;
+    bool m_exposureGood;
+    bool m_phase;
+    int m_numberPhase;
     long m_calibrationExposure;
 
 };
