@@ -26,7 +26,6 @@ void Calibration::run()
 
     while(1)
     {
-
         if(m_startCalibration){
 
             if(m_exposureGood){
@@ -41,7 +40,6 @@ void Calibration::run()
                 m_semCalibration->acquire(1);
             }
             else{
-
                 emit sigEndCalibration();
             }
         }
@@ -50,8 +48,15 @@ void Calibration::run()
     }
 }
 
-void Calibration::calibration(){
+void Calibration::askTakePhoto(){
 
+}
+
+void Calibration::askOpenCamera(){
+
+}
+
+void Calibration::calibration(){
 
     QColor color;
     int r = 0, g = 0, b = 0;

@@ -30,5 +30,12 @@
         <file>icone/video-camera.png</file>
         <file>icone/manometer.png</file>
         <file>icone/setting.png</file>
+        <file>icone/panorama.png</file>
+        <file>icone/setting (1).png</file>
+        <file>icone/upload.png</file>
+        <file>icone/add.png</file>
+        <file>icone/4858685.png</file>
+        <file>icone/exposure.png</file>
+        <file>icone/video.png</file>
     </qresource>
 </RCC>

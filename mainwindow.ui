@@ -1249,7 +1249,7 @@
              </property>
              <property name="icon">
               <iconset resource="icone.qrc">
-               <normaloff>:/iconePhoto/icone/manometer.png</normaloff>:/iconePhoto/icone/manometer.png</iconset>
+               <normaloff>:/iconePhoto/icone/exposure.png</normaloff>:/iconePhoto/icone/exposure.png</iconset>
              </property>
             </widget>
            </item>
@@ -1430,7 +1430,7 @@
   <action name="actionConnect_ZWO">
    <property name="icon">
     <iconset resource="icone.qrc">
-     <normaloff>:/iconePhoto/icone/icons8-ajouter-appareil-photo-96.png</normaloff>:/iconePhoto/icone/icons8-ajouter-appareil-photo-96.png</iconset>
+     <normaloff>:/iconePhoto/icone/add.png</normaloff>:/iconePhoto/icone/add.png</iconset>
    </property>
    <property name="text">
     <string>Connect</string>
@@ -1439,7 +1439,7 @@
   <action name="actionDisconect_ZWO">
    <property name="icon">
     <iconset resource="icone.qrc">
-     <normaloff>:/iconePhoto/icone/icons8-pas-d'appareil-photo-100.png</normaloff>:/iconePhoto/icone/icons8-pas-d'appareil-photo-100.png</iconset>
+     <normaloff>:/iconePhoto/icone/4858685.png</normaloff>:/iconePhoto/icone/4858685.png</iconset>
    </property>
    <property name="text">
     <string>Disconect</string>
@@ -1451,7 +1451,7 @@
    </property>
    <property name="icon">
     <iconset resource="icone.qrc">
-     <normaloff>:/iconePhoto/icone/1F4F8-camera-with-flash-512.png</normaloff>:/iconePhoto/icone/1F4F8-camera-with-flash-512.png</iconset>
+     <normaloff>:/iconePhoto/icone/panorama.png</normaloff>:/iconePhoto/icone/panorama.png</iconset>
    </property>
    <property name="text">
     <string>Photo</string>
@@ -1463,7 +1463,7 @@
    </property>
    <property name="icon">
     <iconset resource="icone.qrc">
-     <normaloff>:/iconePhoto/icone/video-camera.png</normaloff>:/iconePhoto/icone/video-camera.png</iconset>
+     <normaloff>:/iconePhoto/icone/video.png</normaloff>:/iconePhoto/icone/video.png</iconset>
    </property>
    <property name="text">
     <string>Video</string>
