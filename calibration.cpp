@@ -11,6 +11,7 @@ void Calibration::run()
 {
     m_semOpenCam = new QSemaphore;
     m_semGetPhoto = new QSemaphore;
+    m_semCalibration = new QSemaphore;
 
     m_image = new QImage;
 
@@ -28,8 +29,8 @@ void Calibration::run()
     {
         if(m_startCalibration){
 
-            if(m_exposureGood){
-
+            if(!m_exposureGood)
+            {
                 askOpenCamera();
                 m_semOpenCam->acquire(1);
 
@@ -50,10 +51,15 @@ void Calibration::run()
 
 void Calibration::askTakePhoto(){
 
+    emit sigTakePhotoCalibration();
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[CALIBRATION] Send command to take a photo" ;
+
 }
 
 void Calibration::askOpenCamera(){
 
+    emit sigOpenCameraCalibration();
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[CALIBRATION] Send command to open camera";
 }
 
 void Calibration::calibration(){
@@ -84,22 +90,29 @@ void Calibration::calibration(){
     if(saturation >= m_minPixel && saturation <= m_maxPixel){
            m_startCalibration = false;
            m_exposureGood = true;
+
+           qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[CALIBRATION] Calibration Ok";
      }
 
      else if(saturation > m_maxPixel){
 
-           m_controlvalue.val_exposure = m_controlvalue.val_exposure/2;
+           m_calibrationExposure = m_controlvalue.val_exposure/2;
+           m_controlvalue.val_exposure = m_calibrationExposure;
+
+           emit sigNewControlValue(m_controlvalue);
            newPhase = true;
      }
      else if (saturation < m_minPixel)
      {
            m_calibrationExposure = m_controlvalue.val_exposure * 1.2;
+           m_controlvalue.val_exposure = m_calibrationExposure;
+
+           emit sigNewControlValue(m_controlvalue);
            newPhase = false;
      }
 
     if (m_phase != newPhase)
         m_numberPhase++;
-
 
     m_semCalibration->release(1);
 
@@ -133,6 +146,7 @@ void Calibration::startCalibration(int max, int min, AsiCamera::ControlValue con
 
     m_startCalibration = true;
     m_calibrationExposure = false;
+    m_exposureGood = false;
     m_numberPhase = 0;
 
     m_maxPixel = max;
@@ -147,6 +161,7 @@ void Calibration::endCalibration(){
 
     m_startCalibration = false;
     m_calibrationExposure = false;
+    m_exposureGood = false;
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[CALIBRATION] End Calibration";
 
@@ -155,7 +170,6 @@ void Calibration::endCalibration(){
 
 void Calibration::oppenedCameraCalibration()
 {
-
     if(m_startCalibration)
     {
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Camera opened";
@@ -172,17 +186,15 @@ void Calibration::closedCameraCalibration()
     }
 }
 
-void sigOpenCameraMeasure(){
-
-}
-void sigTakePhotoMeasure(){
-
-}
-
 void Calibration::controlValueCalibration(AsiCamera::ControlValue controlvalue)
 {
     if(m_startCalibration){
     m_controlvalue = controlvalue;
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Control value receive";
     }
+}
+
+void Calibration::errorCam()
+{
+
 }

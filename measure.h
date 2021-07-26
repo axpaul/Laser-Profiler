@@ -43,6 +43,9 @@ public slots :
     void positionReception(const double positionActu);
     void controlValueMeasure(const AsiCamera::ControlValue controlvalue);
 
+    void errorCam();
+
+
 signals :
 
     void sigSendPositionMeasure(const float position);

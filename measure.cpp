@@ -79,13 +79,14 @@ void Measure::run()
 void Measure::askTakePhoto()
 {
     emit sigTakePhotoMeasure();
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[CALIBRATION] Send a take photo";
 }
 
 void Measure::askOpenCamera()
 {
     emit sigOpenCameraMeasure();
 
-     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Send a new move";
+     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[MEASURE] Send a open camera";
 }
 
 void Measure::sendPosition(){
@@ -277,7 +278,6 @@ void Measure::propretyImage()
             m_error = true;
         }
 
-
         //Calibrate file
 
 
@@ -291,3 +291,6 @@ void Measure::propretyImage()
     delete m_image;
 }
 
+void Measure::errorCam(){
+
+}
