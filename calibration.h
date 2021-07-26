@@ -37,9 +37,12 @@ public slots :
 
     void controlValueCalibration(AsiCamera::ControlValue controlvalue);
 
+    void errorCam();
+
 signals :
-    void sigOpenCameraMeasure();
-    void sigTakePhotoMeasure();
+
+    void sigTakePhotoCalibration();
+    void sigOpenCameraCalibration();
     void sigEndCalibration();
 
     void sigPixelSaturation(int saturation);

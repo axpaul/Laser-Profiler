@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+  #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -21,6 +21,7 @@
 #include "asicamera.h"
 #include "measure.h"
 #include "imagescene.h"
+#include "calibration.h"
 
 #define VERSION_SERIAL 1.2f
 
@@ -36,6 +37,7 @@ class Motor;
 class AsiCamera;
 class Measure;
 class ImageScene;
+class Calibration;
 
 class MainWindow : public QMainWindow
 {
@@ -58,13 +60,12 @@ public slots :
 
     void cmdToSend();
 
-    // Motor
-
     void opennedSerial(SerialPort::Settings p);
     void closedSerial();
-
     void openSerialPort();
     void closeSerialPort();
+
+    // Motor
 
     void showStateMotor(const bool state, const double position);
     void applyHome();
@@ -102,9 +103,15 @@ public slots :
     // Calibrate
 
     void startCalibration();
+    void endCalibration();
+    void controlValueChange(AsiCamera::ControlValue controlvalue);
+    void pixelSaturationChange(int saturation);
+
+    // other
+
+    void about();
 
 private slots :
-    void about();
 
 signals:
 
@@ -118,8 +125,12 @@ signals:
 
        // Measure
 
-    void sendStartMeasure(int max, int min, float step, QString dir);
-    void setHomeMeasure();
+    void sigSendStartMeasure(int max, int min, float step, QString dir);
+    void sigSetHomeMeasure();
+
+        // Calibration
+
+    void sigSendStartCalibration(int max, int min, AsiCamera::ControlValue controlvalue);
 
 private:
     void initActionsConnections();
@@ -185,6 +196,9 @@ private:
 
      Measure *m_measure;
      bool m_startMeasure;
+
+     bool m_startClibration;
+     Calibration *m_calibration;
 
 };
 #endif // MAINWINDOW_H

@@ -26,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>LaserProfiler 2.5</string>
+   <string>LaserProfiler 2.6</string>
   </property>
   <property name="windowIcon">
    <iconset resource="icone.qrc">
@@ -409,7 +409,7 @@
              <item>
               <widget class="QLabel" name="label_11">
                <property name="text">
-                <string>Temperature camera :</string>
+                <string>Temperature camera (C°) :</string>
                </property>
               </widget>
              </item>
@@ -1242,7 +1242,7 @@
            <item>
             <widget class="QPushButton" name="button_calibration">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="text">
               <string> Calibration</string>
@@ -1324,7 +1324,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
-    <addaction name="actionAbout_Qt"/>
+    <addaction name="actionAboutQt"/>
    </widget>
    <widget class="QMenu" name="menuCamera">
     <property name="title">
@@ -1409,7 +1409,7 @@
     <string>About</string>
    </property>
   </action>
-  <action name="actionAbout_Qt">
+  <action name="actionAboutQt">
    <property name="icon">
     <iconset resource="icone.qrc">
      <normaloff>:/iconeWindows/icone/Qt_logo_2016.svg.png</normaloff>:/iconeWindows/icone/Qt_logo_2016.svg.png</iconset>

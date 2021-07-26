@@ -19,7 +19,6 @@
         <file>icone/route.png</file>
         <file>icone/stop.png</file>
         <file>icone/send.png</file>
-        <file>icone/command-window.png</file>
         <file>icone/checked.png</file>
         <file>icone/house.png</file>
     </qresource>

@@ -43,16 +43,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_serial = new SerialPort;
     m_serialRun = false;
-
     m_serial->start();
 
     m_motor = new Motor;
-
     m_motor->start();
 
     m_measure = new Measure;
-
     m_measure->start();
+
+    m_calibration = new Calibration;
+    m_calibration->start();
 
     initActionsConnectionsPrio();
 
@@ -65,7 +65,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusbar->addWidget(m_status);
 
     initActionsConnections();
-
     motorbuttonDisactivate();
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] " << QThread::currentThread();
@@ -100,6 +99,7 @@ void MainWindow::initActionsConnectionsPrio(){
 
 void MainWindow::initActionsConnections(){
 
+    connect(ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
     connect(ui->actionConfigure, &QAction::triggered, m_settings, &SettingsDialog::showSetting); // set setting serial
@@ -122,7 +122,7 @@ void MainWindow::initActionsConnections(){
     connect(m_motor, &Motor::doHome, this, &MainWindow::applyHome);
     connect(this, &MainWindow::sendPosition, m_motor, &Motor::setPosition);
     connect(ui->button_Home, &QPushButton::clicked, m_motor, &Motor::setHome);
-    connect(this, &MainWindow::setHomeMeasure, m_motor, &Motor::setHome);
+    connect(this, &MainWindow::sigSetHomeMeasure, m_motor, &Motor::setHome);
     connect(ui->button_Position, &QPushButton::clicked, this, &MainWindow::applyPosition);
 
     connect(ui->button_Send, &QPushButton::clicked, this, &MainWindow::cmdToSend);
@@ -151,7 +151,7 @@ void MainWindow::initActionsConnections(){
     connect(ui->actionVideo, &QAction::triggered, this, &MainWindow::buttonVideoActivate);
 
     connect(ui->button_Start_Measure, &QPushButton::clicked, this, &MainWindow::startMeasure);
-    connect(this, &MainWindow::sendStartMeasure, m_measure, &Measure::startMeasure);
+    connect(this, &MainWindow::sigSendStartMeasure, m_measure, &Measure::startMeasure);
     connect(m_measure, &Measure::sigSendPositionMeasure, m_motor, &Motor::setPosition);
     connect(m_motor, &Motor::endMove, m_measure, &Measure::positionReception);
     connect(m_measure, &Measure::sigEndMeasure, this, &MainWindow::endMeasure);
@@ -167,6 +167,16 @@ void MainWindow::initActionsConnections(){
     connect(m_camera, &AsiCamera::sigcontrolValue, this, &MainWindow::controlValue);
 
     connect(ui->button_calibration, &QPushButton::clicked, this, &MainWindow::startCalibration);
+    connect(this, &MainWindow::sigSendStartCalibration, m_calibration, &Calibration::startCalibration);
+    connect(m_calibration, &Calibration::sigEndCalibration, this, &MainWindow::endCalibration);
+    connect(m_calibration, &Calibration::sigPixelSaturation, this, &MainWindow::pixelSaturationChange);
+    connect(m_calibration, &Calibration::sigNewControlValue, this, &MainWindow::controlValueChange);
+    connect(m_calibration, &Calibration::sigOpenCameraCalibration, m_camera, &AsiCamera::askConnect);
+    connect(m_calibration, &Calibration::sigTakePhotoCalibration, m_camera, &AsiCamera::askPhoto);
+    connect(m_camera, &AsiCamera::sigControlValueAlone, m_calibration, &Calibration::controlValueCalibration);
+    connect(m_camera, &AsiCamera::sigOpennedCamera, m_calibration, &Calibration::oppenedCameraCalibration);
+    connect(m_camera, &AsiCamera::sigImageReception, m_calibration, &Calibration::imageReception);
+    connect(m_camera, &AsiCamera::sigClosedCamera, m_calibration, &Calibration::closedCameraCalibration);
 }
 
 /* MainWindow Information */
@@ -385,7 +395,7 @@ void MainWindow::opennedCamera(bool state)
             emit sigAllSettings(ui->spinBox_width->value(), ui->spinBox_Height->value(), 1, ui->spinBox_start_PosX->value(), ui->spinBox_start_PosY->value(), m_format, m_controlValue);
     }
     else{
-
+        QMessageBox::critical(this, "Error Cam", "Problem to open cam");
     }
 
 }
@@ -396,6 +406,7 @@ void MainWindow::closedCamera(bool state)
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera closed";
 
     m_cameraRun = false;
+    m_cameraControlChange = false;
 
     if (m_startMeasure == false)
         buttonCameraDesactivate();   
@@ -569,7 +580,7 @@ void MainWindow::controlValue(const AsiCamera::ControlValue controlvalue, const 
             }
             else if (i == index.ind_temperature)
             {
-                ui->lcdNumber_temperature->display(int(controlvalue.val_temperature));
+                ui->lcdNumber_temperature->display(int(controlvalue.val_temperature/10.0));
             }
             else if (i == index.ind_flip)
             {
@@ -681,6 +692,7 @@ void MainWindow::allSettings(){
     }*/
 
     setSettingsCamera();
+
     m_cameraControlChange = true;
 
     if (m_cameraRun)
@@ -698,50 +710,50 @@ void MainWindow::setSettingsCamera(){
         m_format = ASI_IMG_RAW16;
     }
 
-        m_controlValue.val_gain = ui->spinBox_gain->value();
+    m_controlValue.val_gain = ui->spinBox_gain->value();
 
-        if(ui->checkBox_gain->checkState()){
-            m_controlValue.auto_gain = ASI_TRUE;
-        }
-        else{
-            m_controlValue.auto_gain = ASI_FALSE;
-        }
+    if(ui->checkBox_gain->checkState() && !m_calibration){
+         m_controlValue.auto_gain = ASI_TRUE;
+    }
+    else{
+        m_controlValue.auto_gain = ASI_FALSE;
+    }
 
+    if(!m_calibration)
         m_controlValue.val_exposure = ui->spinBox_exposure->value();
 
-        if(ui->checkBox_exposure->checkState()){
-            m_controlValue.auto_exposure = ASI_TRUE;
-        }
-        else{
-            m_controlValue.auto_exposure = ASI_FALSE;
-        }
+    if(ui->checkBox_exposure->checkState() && !m_calibration){
+        m_controlValue.auto_exposure = ASI_TRUE;
+    }
+    else{
+        m_controlValue.auto_exposure = ASI_FALSE;
+    }
 
-        m_controlValue.val_offset = ui->spinBox_offset->value();
-        m_controlValue.val_bandWidth = ui->spinBox_bandWidh->value();
+    m_controlValue.val_offset = ui->spinBox_offset->value();
+    m_controlValue.val_bandWidth = ui->spinBox_bandWidh->value();
 
-        if(ui->checkBox_bandWidh->checkState()){
-            m_controlValue.auto_bandWidth = ASI_TRUE;
-        }
-        else{
-            m_controlValue.auto_bandWidth = ASI_FALSE;
-        }
+    if(ui->checkBox_bandWidh->checkState() && !m_calibration){
+        m_controlValue.auto_bandWidth = ASI_TRUE;
+    }
+    else{
+        m_controlValue.auto_bandWidth = ASI_FALSE;
+    }
 
-        m_controlValue.val_flip = ui->spinBox_flip->value();
-        m_controlValue.val_autoExpMaxGain = ui->spinBox_autoExpMaxGain->value();
-        m_controlValue.val_autoExpMaxExpMS = ui->spinBox_autoExpMaxExpMS->value();
-        m_controlValue.val_autoExpTargetBrightness = ui->spinBox_autoExpTargetBrightness->value();
-        m_controlValue.val_harwareBin = ui->spinBox_harwareBin->value();
-        m_controlValue.val_highSpeedMode = ui->spinBox_highSpeedMode->value();
+    m_controlValue.val_flip = ui->spinBox_flip->value();
+    m_controlValue.val_autoExpMaxGain = ui->spinBox_autoExpMaxGain->value();
+    m_controlValue.val_autoExpMaxExpMS = ui->spinBox_autoExpMaxExpMS->value();
+    m_controlValue.val_autoExpTargetBrightness = ui->spinBox_autoExpTargetBrightness->value();
+    m_controlValue.val_harwareBin = ui->spinBox_harwareBin->value();
+    m_controlValue.val_highSpeedMode = ui->spinBox_highSpeedMode->value();
 
-        m_width = ui->spinBox_width->value();
-        m_height = ui->spinBox_Height->value();
-        m_bin = 1;
-        m_startX = ui->spinBox_start_PosX->value();
-        m_startY = ui->spinBox_start_PosY->value();
+    m_width = ui->spinBox_width->value();
+    m_height = ui->spinBox_Height->value();
+    m_bin = 1;
+    m_startX = ui->spinBox_start_PosX->value();
+    m_startY = ui->spinBox_start_PosY->value();
 
-        qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Set settings camera";
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Set settings camera";
 }
-
 
 void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int height, const QImage frame)
 {
@@ -785,7 +797,6 @@ void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int heigh
 
 void MainWindow::startMeasure()
 {
-
     m_startMeasure = true;
     QString dir = "";
     dir = QFileDialog::getExistingDirectory(this, "Open Directory", "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -799,7 +810,7 @@ void MainWindow::startMeasure()
     motorNobuttonAll();
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Start Measure";
-    emit sendStartMeasure(ui->spinBox_Max->value(), ui->spinBox_Min->value(), ui->spinBox_measure->value(), dir);
+    emit sigSendStartMeasure(ui->spinBox_Max->value(), ui->spinBox_Min->value(), ui->spinBox_measure->value(), dir);
 }
 
 void MainWindow::endMeasure()
@@ -810,7 +821,7 @@ void MainWindow::endMeasure()
     ui->checkBox_Camera_Parameters->setCheckable(false);
     ui->checkBox_Camera_Parameters->setEnabled(false);
     ui->progressBar->setValue(0);
-    emit setHomeMeasure();
+    emit sigSetHomeMeasure();
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Stop Measure";
 }
@@ -824,10 +835,47 @@ void MainWindow::statutMeasure(const int pourcentage){
 // Calibration
 
 void MainWindow::startCalibration(){
-    //m_calibration = true;
+
+    m_startClibration = true;
     ui->label_CalibrationState->setText("Calibration States : calibration is in progress");
 
+    m_controlValue.val_exposure = 10000;
+    m_controlValue.auto_exposure = ASI_FALSE;
+    ui->checkBox_exposure->setChecked(m_controlValue.auto_exposure);
+    m_controlValue.auto_gain = ASI_FALSE;
+    ui->checkBox_gain->setChecked(m_controlValue.auto_gain);
+    m_controlValue.auto_bandWidth = ASI_FALSE;
+    ui->checkBox_bandWidh->setChecked(m_controlValue.auto_bandWidth);
+
     allSettings();
+
+    ui->checkBox_Camera_Parameters->setCheckable(true);
+    ui->checkBox_Camera_Parameters->setEnabled(false);
+
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Start calibration";
+    emit sigSendStartCalibration(ui->spinBox_max_calibration->value(), ui->spinBox_min_calibration->value(), m_controlValue);
+}
+
+void MainWindow::controlValueChange(AsiCamera::ControlValue controlvalue){
+
+    ui->lcdNumber_expo->display((int)(controlvalue.val_exposure));
+    m_controlValue.val_exposure = controlvalue.val_exposure;
+
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] End calibration";
+
+    allSettings();
+}
+
+void MainWindow::pixelSaturationChange(int saturation){
+
+    ui->lcdNumber_pixel->display(saturation);
+}
+
+void MainWindow::endCalibration(){
+
+    m_startClibration = false;
+    ui->label_CalibrationState->setText("Calibration States : calibration finish !");
+    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] End calibration";
 }
 
 //Button control
@@ -847,7 +895,7 @@ void MainWindow::buttonVideoActivate(){
     ui->spinBox_start_PosY->setEnabled(false);
     ui->comboBox_format->setEnabled(false);
 
-    ui->button_calibration->setEnabled(true);
+    ui->button_calibration->setEnabled(false);
 
 }
 
@@ -858,7 +906,7 @@ void MainWindow::buttonVideoDesactivate(){
     ui->actionPhoto->setEnabled(false);
     ui->actionVideo->setEnabled(false);
     ui->button_Start_Measure->setEnabled(true);
-    ui->button_calibration->setEnabled(false);
+    ui->button_calibration->setEnabled(true);
     ui->spinBox_Height->setEnabled(true);
     ui->spinBox_width->setEnabled(true);
     ui->spinBox_start_PosX->setEnabled(true);
@@ -1020,3 +1068,4 @@ void MainWindow::buttonMesureDisactive(){
     ui->actionVideo->setEnabled(false);
 
 }
+
