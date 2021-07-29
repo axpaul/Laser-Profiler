@@ -47,6 +47,8 @@ signals :
 
     void sigPixelSaturation(int saturation);
     void sigNewControlValue(AsiCamera::ControlValue controlvalue);
+    void sigError();
+
 
 private:
 

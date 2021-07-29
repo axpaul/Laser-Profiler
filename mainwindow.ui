@@ -275,10 +275,10 @@
                     <bool>true</bool>
                    </property>
                    <property name="maximum">
-                    <number>60000</number>
+                    <number>600000</number>
                    </property>
                    <property name="value">
-                    <number>100</number>
+                    <number>100000</number>
                    </property>
                   </widget>
                  </item>
@@ -1343,6 +1343,9 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -1437,6 +1440,9 @@
    </property>
   </action>
   <action name="actionDisconect_ZWO">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="icone.qrc">
      <normaloff>:/iconePhoto/icone/4858685.png</normaloff>:/iconePhoto/icone/4858685.png</iconset>

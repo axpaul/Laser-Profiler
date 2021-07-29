@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_calibration = new Calibration;
     m_calibration->start();
+    m_startClibration = false;
 
     initActionsConnectionsPrio();
 
@@ -712,17 +713,17 @@ void MainWindow::setSettingsCamera(){
 
     m_controlValue.val_gain = ui->spinBox_gain->value();
 
-    if(ui->checkBox_gain->checkState() && !m_calibration){
+    if(ui->checkBox_gain->checkState() && !m_startClibration){
          m_controlValue.auto_gain = ASI_TRUE;
     }
     else{
         m_controlValue.auto_gain = ASI_FALSE;
     }
 
-    if(!m_calibration)
+    if(!m_startClibration)
         m_controlValue.val_exposure = ui->spinBox_exposure->value();
 
-    if(ui->checkBox_exposure->checkState() && !m_calibration){
+    if(ui->checkBox_exposure->checkState() && !m_startClibration){
         m_controlValue.auto_exposure = ASI_TRUE;
     }
     else{
@@ -732,7 +733,7 @@ void MainWindow::setSettingsCamera(){
     m_controlValue.val_offset = ui->spinBox_offset->value();
     m_controlValue.val_bandWidth = ui->spinBox_bandWidh->value();
 
-    if(ui->checkBox_bandWidh->checkState() && !m_calibration){
+    if(ui->checkBox_bandWidh->checkState() && !m_startClibration){
         m_controlValue.auto_bandWidth = ASI_TRUE;
     }
     else{
@@ -850,7 +851,8 @@ void MainWindow::startCalibration(){
     allSettings();
 
     ui->checkBox_Camera_Parameters->setCheckable(true);
-    ui->checkBox_Camera_Parameters->setEnabled(false);
+    buttonMesureDisactive();
+
 
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Start calibration";
     emit sigSendStartCalibration(ui->spinBox_max_calibration->value(), ui->spinBox_min_calibration->value(), m_controlValue);
@@ -876,6 +878,8 @@ void MainWindow::endCalibration(){
     m_startClibration = false;
     ui->label_CalibrationState->setText("Calibration States : calibration finish !");
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] End calibration";
+    buttonMeasureActive();
+
 }
 
 //Button control
@@ -894,8 +898,8 @@ void MainWindow::buttonVideoActivate(){
     ui->spinBox_start_PosX->setEnabled(false);
     ui->spinBox_start_PosY->setEnabled(false);
     ui->comboBox_format->setEnabled(false);
-
     ui->button_calibration->setEnabled(false);
+
 
 }
 
@@ -912,6 +916,7 @@ void MainWindow::buttonVideoDesactivate(){
     ui->spinBox_start_PosX->setEnabled(true);
     ui->spinBox_start_PosY->setEnabled(true);
     ui->comboBox_format->setEnabled(true);
+    ui->button_calibration->setEnabled(true);
 
 }
 
@@ -971,10 +976,12 @@ void MainWindow::buttonCameraActivate(){
         ui->checkBox_exposure->setEnabled(true);
         ui->checkBox_Camera_Parameters->setEnabled(true);*/
 
+    if(!m_startClibration){
         ui->actionConnect_ZWO->setEnabled(false);
         ui->actionDisconect_ZWO->setEnabled(true);
         ui->actionPhoto->setEnabled(true);
         ui->actionVideo->setEnabled(true);
+    }
 
 }
 
@@ -1002,11 +1009,12 @@ void MainWindow::buttonCameraDesactivate(){
         ui->checkBox_exposure->setEnabled(false);
         ui->checkBox_Camera_Parameters->setEnabled(true);*/
 
+    if(!m_startClibration){
         ui->actionConnect_ZWO->setEnabled(true);
         ui->actionDisconect_ZWO->setEnabled(false);
         ui->actionPhoto->setEnabled(false);
         ui->actionVideo->setEnabled(false);
-
+    }
 }
 
 void MainWindow::buttonMeasureActive(){
@@ -1031,6 +1039,7 @@ void MainWindow::buttonMeasureActive(){
     ui->checkBox_bandWidh->setEnabled(false);
     ui->checkBox_exposure->setEnabled(false);
     ui->checkBox_Camera_Parameters->setEnabled(true);
+    ui->button_calibration->setEnabled(false);
 
     ui->actionConnect_ZWO->setEnabled(false);
     ui->actionDisconect_ZWO->setEnabled(false);
@@ -1061,6 +1070,7 @@ void MainWindow::buttonMesureDisactive(){
     ui->checkBox_bandWidh->setEnabled(true);
     ui->checkBox_exposure->setEnabled(true);
     ui->checkBox_Camera_Parameters->setEnabled(true);
+    ui->button_calibration->setEnabled(true);
 
     ui->actionConnect_ZWO->setEnabled(true);
     ui->actionDisconect_ZWO->setEnabled(false);

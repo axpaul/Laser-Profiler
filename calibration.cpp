@@ -95,12 +95,21 @@ void Calibration::calibration(){
      }
 
      else if(saturation > m_maxPixel){
-
            m_calibrationExposure = m_controlvalue.val_exposure/2;
-           m_controlvalue.val_exposure = m_calibrationExposure;
 
-           emit sigNewControlValue(m_controlvalue);
-           newPhase = true;
+           if(m_calibrationExposure >= 0){
+               m_controlvalue.val_exposure = m_calibrationExposure;
+
+               emit sigNewControlValue(m_controlvalue);
+               newPhase = true;
+           }
+           else{
+               m_startCalibration = false;
+               m_exposureGood = true;
+               m_error = true;
+
+               qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][[CALIBRATION] Calibration error";
+           }
      }
      else if (saturation < m_minPixel)
      {
