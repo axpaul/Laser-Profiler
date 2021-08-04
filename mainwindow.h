@@ -197,7 +197,7 @@ private:
      Measure *m_measure;
      bool m_startMeasure;
 
-     bool m_startClibration;
+     bool m_startCalibration;
      Calibration *m_calibration;
 
 };

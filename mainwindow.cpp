@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_calibration = new Calibration;
     m_calibration->start();
-    m_startClibration = false;
+    m_startCalibration = false;
 
     initActionsConnectionsPrio();
 
@@ -389,11 +389,14 @@ void MainWindow::opennedCamera(bool state)
         qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Camera openned";
         m_cameraRun = true;
 
-        if (m_startMeasure == false)
+        if (!m_startMeasure && !m_startCalibration )
             buttonCameraActivate();
 
         if (m_cameraControlChange)
             emit sigAllSettings(ui->spinBox_width->value(), ui->spinBox_Height->value(), 1, ui->spinBox_start_PosX->value(), ui->spinBox_start_PosY->value(), m_format, m_controlValue);
+
+        if(m_startMeasure)
+            emit sigAllSettings(m_width, m_height, 1, m_startX, m_startY, m_format, m_controlValue);
     }
     else{
         QMessageBox::critical(this, "Error Cam", "Problem to open cam");
@@ -704,56 +707,59 @@ void MainWindow::allSettings(){
 
 void MainWindow::setSettingsCamera(){
 
-    if(ui->comboBox_format->currentIndex() == 0){
-        m_format = ASI_IMG_RAW8;
-    }
-    else{
-        m_format = ASI_IMG_RAW16;
-    }
+   // if(!m_startMeasure){
 
-    m_controlValue.val_gain = ui->spinBox_gain->value();
+        if(ui->comboBox_format->currentIndex() == 0){
+            m_format = ASI_IMG_RAW8;
+        }
+        else{
+            m_format = ASI_IMG_RAW16;
+        }
 
-    if(ui->checkBox_gain->checkState() && !m_startClibration){
-         m_controlValue.auto_gain = ASI_TRUE;
-    }
-    else{
-        m_controlValue.auto_gain = ASI_FALSE;
-    }
+        m_controlValue.val_gain = ui->spinBox_gain->value();
 
-    if(!m_startClibration)
-        m_controlValue.val_exposure = ui->spinBox_exposure->value();
+        if(ui->checkBox_gain->checkState() && !m_startCalibration){
+             m_controlValue.auto_gain = ASI_TRUE;
+        }
+        else{
+            m_controlValue.auto_gain = ASI_FALSE;
+        }
 
-    if(ui->checkBox_exposure->checkState() && !m_startClibration){
-        m_controlValue.auto_exposure = ASI_TRUE;
-    }
-    else{
-        m_controlValue.auto_exposure = ASI_FALSE;
-    }
+        if(!m_startCalibration)
+            m_controlValue.val_exposure = ui->spinBox_exposure->value();
 
-    m_controlValue.val_offset = ui->spinBox_offset->value();
-    m_controlValue.val_bandWidth = ui->spinBox_bandWidh->value();
+        if(ui->checkBox_exposure->checkState() && !m_startCalibration){
+            m_controlValue.auto_exposure = ASI_TRUE;
+        }
+        else{
+            m_controlValue.auto_exposure = ASI_FALSE;
+        }
 
-    if(ui->checkBox_bandWidh->checkState() && !m_startClibration){
-        m_controlValue.auto_bandWidth = ASI_TRUE;
-    }
-    else{
-        m_controlValue.auto_bandWidth = ASI_FALSE;
-    }
+        m_controlValue.val_offset = ui->spinBox_offset->value();
+        m_controlValue.val_bandWidth = ui->spinBox_bandWidh->value();
 
-    m_controlValue.val_flip = ui->spinBox_flip->value();
-    m_controlValue.val_autoExpMaxGain = ui->spinBox_autoExpMaxGain->value();
-    m_controlValue.val_autoExpMaxExpMS = ui->spinBox_autoExpMaxExpMS->value();
-    m_controlValue.val_autoExpTargetBrightness = ui->spinBox_autoExpTargetBrightness->value();
-    m_controlValue.val_harwareBin = ui->spinBox_harwareBin->value();
-    m_controlValue.val_highSpeedMode = ui->spinBox_highSpeedMode->value();
+        if(ui->checkBox_bandWidh->checkState() && !m_startCalibration){
+            m_controlValue.auto_bandWidth = ASI_TRUE;
+        }
+        else{
+            m_controlValue.auto_bandWidth = ASI_FALSE;
+        }
 
-    m_width = ui->spinBox_width->value();
-    m_height = ui->spinBox_Height->value();
-    m_bin = 1;
-    m_startX = ui->spinBox_start_PosX->value();
-    m_startY = ui->spinBox_start_PosY->value();
+        m_controlValue.val_flip = ui->spinBox_flip->value();
+        m_controlValue.val_autoExpMaxGain = ui->spinBox_autoExpMaxGain->value();
+        m_controlValue.val_autoExpMaxExpMS = ui->spinBox_autoExpMaxExpMS->value();
+        m_controlValue.val_autoExpTargetBrightness = ui->spinBox_autoExpTargetBrightness->value();
+        m_controlValue.val_harwareBin = ui->spinBox_harwareBin->value();
+        m_controlValue.val_highSpeedMode = ui->spinBox_highSpeedMode->value();
 
-    qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Set settings camera";
+        m_width = ui->spinBox_width->value();
+        m_height = ui->spinBox_Height->value();
+        m_bin = 1;
+        m_startX = ui->spinBox_start_PosX->value();
+        m_startY = ui->spinBox_start_PosY->value();
+
+        qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] Set settings camera";
+   // }
 }
 
 void MainWindow::showImage(ASI_IMG_TYPE format, const int width, const int height, const QImage frame)
@@ -819,8 +825,8 @@ void MainWindow::endMeasure()
     buttonMesureDisactive();
     motorbuttonActivate();
     m_startMeasure = false;
-    ui->checkBox_Camera_Parameters->setCheckable(false);
-    ui->checkBox_Camera_Parameters->setEnabled(false);
+    //ui->checkBox_Camera_Parameters->setCheckable(false);
+    ui->checkBox_Camera_Parameters->setEnabled(true);
     ui->progressBar->setValue(0);
     emit sigSetHomeMeasure();
 
@@ -837,7 +843,7 @@ void MainWindow::statutMeasure(const int pourcentage){
 
 void MainWindow::startCalibration(){
 
-    m_startClibration = true;
+    m_startCalibration = true;
     ui->label_CalibrationState->setText("Calibration States : calibration is in progress");
 
     m_controlValue.val_exposure = 10000;
@@ -850,7 +856,7 @@ void MainWindow::startCalibration(){
 
     allSettings();
 
-    ui->checkBox_Camera_Parameters->setCheckable(true);
+    //ui->checkBox_Camera_Parameters->setCheckable(true);
     buttonMesureDisactive();
 
 
@@ -875,10 +881,10 @@ void MainWindow::pixelSaturationChange(int saturation){
 
 void MainWindow::endCalibration(){
 
-    m_startClibration = false;
+    m_startCalibration = false;
     ui->label_CalibrationState->setText("Calibration States : calibration finish !");
     qDebug() << "[" << QDateTime::currentDateTime().toString("dd-MM-yyyy_HH.mm.ss") << "][MAINWINDOW] End calibration";
-    buttonMeasureActive();
+    buttonVideoDesactivate();
 
 }
 
@@ -976,12 +982,10 @@ void MainWindow::buttonCameraActivate(){
         ui->checkBox_exposure->setEnabled(true);
         ui->checkBox_Camera_Parameters->setEnabled(true);*/
 
-    if(!m_startClibration){
         ui->actionConnect_ZWO->setEnabled(false);
         ui->actionDisconect_ZWO->setEnabled(true);
         ui->actionPhoto->setEnabled(true);
         ui->actionVideo->setEnabled(true);
-    }
 
 }
 
@@ -1009,12 +1013,10 @@ void MainWindow::buttonCameraDesactivate(){
         ui->checkBox_exposure->setEnabled(false);
         ui->checkBox_Camera_Parameters->setEnabled(true);*/
 
-    if(!m_startClibration){
         ui->actionConnect_ZWO->setEnabled(true);
         ui->actionDisconect_ZWO->setEnabled(false);
         ui->actionPhoto->setEnabled(false);
         ui->actionVideo->setEnabled(false);
-    }
 }
 
 void MainWindow::buttonMeasureActive(){
@@ -1038,7 +1040,7 @@ void MainWindow::buttonMeasureActive(){
     ui->checkBox_gain->setEnabled(false);
     ui->checkBox_bandWidh->setEnabled(false);
     ui->checkBox_exposure->setEnabled(false);
-    ui->checkBox_Camera_Parameters->setEnabled(true);
+    //ui->checkBox_Camera_Parameters->setEnabled(true);
     ui->button_calibration->setEnabled(false);
 
     ui->actionConnect_ZWO->setEnabled(false);
@@ -1069,7 +1071,7 @@ void MainWindow::buttonMesureDisactive(){
     ui->checkBox_gain->setEnabled(true);
     ui->checkBox_bandWidh->setEnabled(true);
     ui->checkBox_exposure->setEnabled(true);
-    ui->checkBox_Camera_Parameters->setEnabled(true);
+    //ui->checkBox_Camera_Parameters->setEnabled(true);
     ui->button_calibration->setEnabled(true);
 
     ui->actionConnect_ZWO->setEnabled(true);

@@ -140,6 +140,9 @@ void Measure::imageReception(ASI_IMG_TYPE format, const int width, const int hei
         }
 
         *m_image = frame;
+        m_format = format;
+        m_height = height;
+        m_width = width;
 
         propretyImage();
         m_semGetPhoto->release(1);
@@ -221,8 +224,10 @@ void Measure::propretyImage()
              "AutoExpMaxGain : %9 \n"
              "AutoExpMaxExpMS : %10 \n"
              "AutoExpTargetBrightness : %11 \n"
-             "HarwareBin : %12 \n"
-             "HighSpeedMode : %13 \n")
+             "HighSpeedMode : %12 \n"
+             "Format : %13 \n"
+             "Height : %14 \n"
+             "Widh : %15 \n")
             .arg(m_positionActu)
             .arg(m_controlvalue.val_gain)
             .arg(m_controlvalue.val_exposure)
@@ -234,7 +239,10 @@ void Measure::propretyImage()
             .arg(m_controlvalue.val_autoExpMaxGain)
             .arg(m_controlvalue.val_autoExpTargetBrightness)
             .arg(m_controlvalue.val_harwareBin)
-            .arg(m_controlvalue.auto_highSpeedMode);
+            .arg(m_controlvalue.auto_highSpeedMode)
+            .arg(m_format)
+            .arg(m_height)
+            .arg(m_width);
 
 
     nameImage.prepend(m_imageDir);

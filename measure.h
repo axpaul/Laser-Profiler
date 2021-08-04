@@ -91,6 +91,11 @@ private :
     QDir m_mainFolder;
     QDir m_imageFolder;
 
+    int m_width;
+    int m_height;
+
+    ASI_IMG_TYPE m_format;
+
 };
 
 #endif // MEASURE_H

@@ -13,7 +13,7 @@ void Calibration::run()
     m_semGetPhoto = new QSemaphore;
     m_semCalibration = new QSemaphore;
 
-    m_image = new QImage;
+     m_image = new QImage;
 
     m_error = false;
     m_exposureGood = false;
@@ -29,8 +29,6 @@ void Calibration::run()
     {
         if(m_startCalibration){
 
-            if(!m_exposureGood)
-            {
                 askOpenCamera();
                 m_semOpenCam->acquire(1);
 
@@ -39,13 +37,17 @@ void Calibration::run()
 
                 calibration();
                 m_semCalibration->acquire(1);
+        }       
+        else{
+
+            if (m_exposureGood)
+            {
+                endCalibration();
             }
-            else{
-                emit sigEndCalibration();
-            }
-        }
-        else
+
             QThread::msleep(100);
+
+        }
     }
 }
 
